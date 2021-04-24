@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 16
+version 32
 __lua__
 
 
@@ -165,7 +165,7 @@ function _draw()
 	draw_phobos()
 	draw_demos()
 	draw_luna()
-	draw_target(target.x, target.y)
+ --draw_target(target.x, target.y)
 
 	--print(demos.x)
 	--print(demos.y)

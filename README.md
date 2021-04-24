@@ -1,2 +1,5 @@
-# pico8
-A place to store my PICO-8 games during development.
+# Three Body Problem Pico 8 Simulation Experiment
+
+# Results: 
+
+1. 
