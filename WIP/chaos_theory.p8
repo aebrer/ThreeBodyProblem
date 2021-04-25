@@ -92,7 +92,7 @@ target = {
 function move_planet(p)
 	
 	if p.f >= 2 then
-		
+		planet_crash = true
 	else
 
  	for f in all(planets) do
@@ -116,8 +116,13 @@ function move_planet(p)
  	p.vy = mid(-6, p.vy, 6)
  
  	--move
- 	p.x+=p.vx -- (sx - 63)
- 	p.y+=p.vy -- (sy - 63)
+ 	if planet_crash then
+ 	  p.x+=p.vx -- (sx - 63)
+ 	  p.y+=p.vy -- (sy - 63)
+ 	else
+ 	  p.x+=p.vx - (sx - 63)
+   	p.y+=p.vy - (sy - 63)
+  end
  	
  end
 end
@@ -196,6 +201,8 @@ function _update60()
 		cls()
 	end
 
+ planet_crash = false
+
 	planets = {}
 	add(planets, phobos)
 	add(planets, demos)
@@ -211,8 +218,8 @@ function _update60()
 	end
 	
 	-- target stays in a fixed position
-	--target.x -= (sx - 63)
-	--target.y -= (sy - 63)
+	target.x = sx
+	target.y = sy
 
 end
 	
