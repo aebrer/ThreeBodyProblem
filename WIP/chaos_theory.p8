@@ -47,8 +47,8 @@ end
 --functions
 
 phobos = {
-	x=rnd(63) + 63,
-	y=rnd(63),
+	x=rnd(128),
+	y=rnd(128),
 	m=30,
 	vx=rnd(0.2),
 	vy=rnd(1.0)+0.2,
@@ -60,8 +60,8 @@ phobos = {
 
 
 demos = {
-	x=rnd(63),
-	y=rnd(63) + 63,
+	x=rnd(128),
+	y=rnd(128),
 	m=30,
 	vx=-1 * phobos.vx,
 	vy=-1 * phobos.vy,
@@ -72,8 +72,8 @@ demos = {
 }
 
 luna = {
-	x=rnd(20)+60,
-	y=rnd(20)+60,
+	x=rnd(128),
+	y=rnd(128),
 	m=30,
 	vx=0,
 	vy=0,

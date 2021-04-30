@@ -8,3 +8,4 @@
 4. Three Body Problem #004 - vertical moment https://www.hicetnunc.xyz/objkt/51645
 5. Three Body Problem #005 - fast and furious https://www.hicetnunc.xyz/objkt/53153
 6. Three Body Problem #006 - indecision https://www.hicetnunc.xyz/objkt/54695
+7. Three Body Problem #007 - pendulum https://www.hicetnunc.xyz/objkt/56306
