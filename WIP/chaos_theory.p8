@@ -6,6 +6,10 @@ __lua__
 -- to do: stars on background, collisions
 
 function draw_phobos()
+	-- now draw the trail
+	for i=1,#phobos.history,1 do
+	  spr(34, phobos.history[i]["x"], phobos.history[i]["y"])
+	end
 	if phobos.offscreen then
 		spr(18, phobos.ix, phobos.iy)
 	else
@@ -14,6 +18,10 @@ function draw_phobos()
 end
 
 function draw_demos()
+	-- now draw the trail
+	for i=1,#demos.history,1 do
+	  spr(36, demos.history[i]["x"], demos.history[i]["y"])
+	end
 	if demos.offscreen then
 		spr(20, demos.ix, demos.iy)
 	else
@@ -22,6 +30,11 @@ function draw_demos()
 end
 
 function draw_luna()
+	-- now draw the trail
+	for i=1,#luna.history,1 do
+	  spr(33, luna.history[i]["x"], luna.history[i]["y"])
+	end
+	
 	if luna.offscreen then
 		spr(17, luna.ix, luna.iy)
 	else
@@ -39,6 +52,10 @@ end
 blank_timer_max=600
 blank_timer=blank_timer_max
 
+snapshot_rate=4
+snapshot_timer=snapshot_rate
+trail_length=50
+
 function _init()
 	cls()
 end
@@ -55,7 +72,8 @@ phobos = {
 	f=0,
 	ix=0,
 	iy=0,
-	offscreen=false
+	offscreen=false,
+	history={}
 }
 
 
@@ -68,7 +86,8 @@ demos = {
 	f=0,
 	ix=0,
 	iy=0,
-	offscreen=false
+	offscreen=false,
+	history={}
 }
 
 luna = {
@@ -80,7 +99,8 @@ luna = {
 	f=0,
 	ix=0,
 	iy=0,
-	offscreen=false
+	offscreen=false,
+	history={}
 }
 
 target = {
@@ -172,6 +192,7 @@ function _draw()
 	draw_luna()
  --draw_target(target.x, target.y)
 
+ --print(unpack(luna.x_history))
 	--print(demos.x)
 	--print(demos.y)
 	--print(phobos.x)
@@ -201,6 +222,26 @@ function _update60()
 		cls()
 	end
 
+ snapshot_timer-=1
+ if snapshot_timer<0 then
+   snapshot_timer=snapshot_rate
+   -- record snapshots
+   add(phobos.history, {x=phobos.x, y=phobos.y})
+   if #phobos.history > trail_length then
+     deli(phobos.history, 1)
+   end
+
+   add(demos.history, {x=demos.x, y=demos.y})
+   if #demos.history > trail_length then
+     deli(demos.history, 1)
+   end
+   
+   add(luna.history, {x=luna.x, y=luna.y})
+   if #luna.history > trail_length then
+     deli(luna.history, 1)
+   end
+   
+ end
  planet_crash = false
 
 	planets = {}
@@ -262,6 +303,11 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000a0000000a90990a8a90980a8a00080a80000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000a0009000a09a8998898a8998898a80080980800000800000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000090000a8a8988aa8a8988aa800908a0000000a00000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000066000000aa00000000000000330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000066000000aa00000000000000330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __label__
 88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 88888eeeeee888777777888eeeeee888eeeeee888888888888888888888888888888888888888888888ff8ff8888228822888222822888888822888888228888
