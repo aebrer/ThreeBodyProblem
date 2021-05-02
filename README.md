@@ -10,3 +10,4 @@
 6. indecision https://www.hicetnunc.xyz/objkt/54695
 7. pendulum https://www.hicetnunc.xyz/objkt/56306
 8. ring! https://www.hicetnunc.xyz/objkt/57910
+9. star of david https://www.hicetnunc.xyz/objkt/59278
