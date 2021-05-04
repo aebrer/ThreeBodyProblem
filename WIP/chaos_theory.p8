@@ -52,9 +52,9 @@ end
 blank_timer_max=600
 blank_timer=blank_timer_max
 
-snapshot_rate=2
+snapshot_rate=6
 snapshot_timer=snapshot_rate
-trail_length=500
+trail_length=66
 
 function _init()
 	cls()
@@ -124,7 +124,7 @@ function move_planet(p)
  			dist=pythag(f.x-p.x,f.y-p.y)
  			dist = mid(0.01, dist, 50)
  			angle = atan2(p.x-f.x,p.y-f.y)
- 			force = (p.m * f.m * (6.67*10^-3)) / dist^2
+ 			force = (p.m * f.m * (6.67*10^-3)) / dist^6
  			force = mid(0.01, force, 2)
  			p.f = max(force, p.f)
  			p.vx=p.vx-force*cos(angle)
@@ -141,7 +141,7 @@ function move_planet(p)
  	  p.y+=p.vy -- (sy - 63)
  	else
  	  p.x+=p.vx - (sx - 63)
-   	p.y+=p.vy - (sy - 63)
+    p.y+=p.vy - (sy - 63)
   end
  	
  end
