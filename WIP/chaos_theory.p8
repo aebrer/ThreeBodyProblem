@@ -3,7 +3,11 @@ version 32
 __lua__
 
 
--- to do: stars on background, collisions
+-- to do: 
+-- - stars on background
+-- - a comet that comes by
+-- - portals/wormholes
+--     - and maybe they transfer gravity
 
 function draw_phobos()
 	-- now draw the trail
@@ -52,9 +56,9 @@ end
 blank_timer_max=600
 blank_timer=blank_timer_max
 
-snapshot_rate=6
+snapshot_rate=4
 snapshot_timer=snapshot_rate
-trail_length=66
+trail_length=50
 
 function _init()
 	cls()
@@ -111,9 +115,9 @@ target = {
 
 function move_planet(p)
 	
-	if p.f >= 2 then
-		planet_crash = true
-	else
+	--if p.f >= 2 then	 
+		--planet_crash = true
+	--else
 
  	for f in all(planets) do
  		local dist=0
@@ -144,7 +148,7 @@ function move_planet(p)
     p.y+=p.vy - (sy - 63)
   end
  	
- end
+ --end
 end
 
 function pythag(a,b)

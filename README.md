@@ -13,3 +13,4 @@
 9. star of david https://www.hicetnunc.xyz/objkt/59278
 10. spirograph https://www.hicetnunc.xyz/objkt/60893
 11. that's not supposed to happen https://www.hicetnunc.xyz/objkt/62691
+12. debugging https://www.hicetnunc.xyz/objkt/64241
