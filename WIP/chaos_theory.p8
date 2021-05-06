@@ -1,13 +1,171 @@
 pico-8 cartridge // http://www.pico-8.com
 version 32
 __lua__
-
+--init
 
 -- to do: 
 -- - stars on background
 -- - a comet that comes by
 -- - portals/wormholes
 --     - and maybe they transfer gravity
+
+function _init()
+ blank_timer_max=600
+ blank_timer=blank_timer_max
+
+ snapshot_rate=4
+ snapshot_timer=snapshot_rate
+ trail_length=50
+	cls()
+	planet_crash = false
+	planets = {}
+ 
+ phobos = {
+ 	x=rnd(128),
+ 	y=rnd(128),
+ 	m=15,
+ 	vx=rnd(0.2),
+	 vy=rnd(1.0)+0.2,
+	 f=0,
+	 ix=0,
+	 iy=0,
+	 offscreen=false,
+	 history={},
+	 crashed=false
+ }
+
+ demos = {
+	 x=rnd(128),
+	 y=rnd(128),
+	 m=15,
+ 	vx=-1 * rnd(0.2),
+	 vy=-1 * rnd(1.0)+0.2,
+	 f=0,
+	 ix=0,
+	 iy=0,
+	 offscreen=false,
+	 history={},
+	 crashed=false
+ }
+
+ luna = {
+	 x=rnd(128),
+	 y=rnd(128),
+ 	m=15,
+ 	vx=0,
+ 	vy=0,
+	 f=0,
+	 ix=0,
+	 iy=0,
+	 offscreen=false,
+	 history={},
+	 crashed=false
+ }
+
+ target = {
+	 x=rnd(57)+70,
+	 y=rnd(57)+70
+ }
+	
+	add(planets, phobos)
+	add(planets, demos)
+	add(planets, luna)
+end
+
+-->8
+--move
+
+function move_planet(p)
+	
+ if p.crashed == true then
+  --do nothing
+  p.vx=0
+	 p.vy=0
+	
+	else
+	
+ 	for f in all(planets) do
+ 		local dist=0
+ 		local angle=0
+ 		local force=0
+ 		
+ 		if not(f==p) and not p.crashed then
+ 			dist=pythag(f.x-p.x,f.y-p.y)
+ 			-- calc crash here
+ 			if dist < 2 then
+ 			 p.crashed = true
+	    planet_crash = true
+	    p.vx=0
+	    p.vy=0
+ 			 f.crashed = true
+ 			 f.vx=0
+ 			 f.vy=0
+ 			 break
+ 			end
+ 			--dist = mid(0.01, dist, 100)
+ 			angle = atan2(p.x-f.x,p.y-f.y)
+ 			force = ((p.m * f.m * (6.67*10^-3)) / dist^2)
+   	force = mid(0.01, force, 100)
+ 			p.f = max(force, p.f)
+ 			p.vx=p.vx-force*cos(angle)
+ 			p.vy=p.vy-force*sin(angle)
+ 		end
+ 	end
+ 	
+ 	p.vx = max(-10, p.vx)
+ 	p.vx = min(p.vx, 10)
+ 	p.vy = max(-10, p.vy)
+ 	p.vy = min(p.vy, 10)
+ 
+ 	--move
+ 	--only two or less planets remain
+ 	if planet_crash then
+ 	 p.x+=p.vx -- (sx - 63)
+ 	 p.y+=p.vy -- (sy - 63)
+ 	else
+ 	 p.x+=p.vx - (sx - 63)
+   p.y+=p.vy - (sy - 63)
+  end
+ 	
+ end
+end
+
+
+-->8
+--draw
+
+function _draw()
+	--comment out for trails
+	cls()
+	
+	draw_phobos()
+	draw_demos()
+	draw_luna()
+ --draw_target(target.x, target.y)
+
+ --print(unpack(luna.x_history))
+	--print(demos.x)
+	--print(demos.y)
+	--print(phobos.x)
+	--print(phobos.y)
+	--print(target.x)
+	--print(target.y)
+	--print(sx)
+	--print(sy)
+	--print(angle)
+	--print(force)
+	--print(phobos.f)
+	--print(phobos.vx)
+	--print(phobos.vy)
+	--print(demos.f)
+	--print(demos.vx)
+	--print(demos.vy)
+	--print(luna.f)
+	--print(luna.vx)
+	--print(luna.vy)
+	--print(#planets)
+	
+end
 
 function draw_phobos()
 	-- now draw the trail
@@ -52,169 +210,6 @@ function draw_target(x,y)
 	circfill(x,y,2,8)
 	circfill(x,y,1,7)
 end
-
-blank_timer_max=600
-blank_timer=blank_timer_max
-
-snapshot_rate=4
-snapshot_timer=snapshot_rate
-trail_length=50
-
-function _init()
-	cls()
-end
-
--->8
---functions
-
-phobos = {
-	x=rnd(128),
-	y=rnd(128),
-	m=30,
-	vx=rnd(0.2),
-	vy=rnd(1.0)+0.2,
-	f=0,
-	ix=0,
-	iy=0,
-	offscreen=false,
-	history={}
-}
-
-
-demos = {
-	x=rnd(128),
-	y=rnd(128),
-	m=30,
-	vx=-1 * phobos.vx,
-	vy=-1 * phobos.vy,
-	f=0,
-	ix=0,
-	iy=0,
-	offscreen=false,
-	history={}
-}
-
-luna = {
-	x=rnd(128),
-	y=rnd(128),
-	m=30,
-	vx=0,
-	vy=0,
-	f=0,
-	ix=0,
-	iy=0,
-	offscreen=false,
-	history={}
-}
-
-target = {
-	x=rnd(57)+70,
-	y=rnd(57)+70
-}
-
-
-function move_planet(p)
-	
-	--if p.f >= 2 then	 
-		--planet_crash = true
-	--else
-
- 	for f in all(planets) do
- 		local dist=0
- 		local angle=0
- 		local force=0
- 		
- 		if not(f==p) then
- 			dist=pythag(f.x-p.x,f.y-p.y)
- 			dist = mid(0.01, dist, 50)
- 			angle = atan2(p.x-f.x,p.y-f.y)
- 			force = (p.m * f.m * (6.67*10^-3)) / dist^6
- 			force = mid(0.01, force, 2)
- 			p.f = max(force, p.f)
- 			p.vx=p.vx-force*cos(angle)
- 			p.vy=p.vy-force*sin(angle)
- 		end
- 	end
- 	
- 	p.vx = mid(-6, p.vx, 6)
- 	p.vy = mid(-6, p.vy, 6)
- 
- 	--move
- 	if planet_crash then
- 	  p.x+=p.vx -- (sx - 63)
- 	  p.y+=p.vy -- (sy - 63)
- 	else
- 	  p.x+=p.vx - (sx - 63)
-    p.y+=p.vy - (sy - 63)
-  end
- 	
- --end
-end
-
-function pythag(a,b)
-	if a > 126 then a = 126 end
-	if b > 126 then b = 126 end
-	return sqrt(a^2+b^2)
-end
-
-function offscreen_check(p)
-	if p.x < 0 then 
-		p.ix = 0
-		p.offscreen = true
-	end
-	if p.y < 0 then 
-		p.iy = 0
-		p.offscreen = true
-	end
-	if p.x > 127 then 
-		p.ix = 126
-		p.offscreen = true
-	end
-	if p.y > 127 then 
-		p.iy = 126
-		p.offscreen = true
-	end
-	if (0 <= p.x) and (p.x <= 127) then
-		p.ix = p.x
-	end
-	if (0 <= p.y) and (p.y <= 127) then
-		p.iy = p.y
-	end
-	if (0 <= p.x) and (p.x <= 127) and (0 <= p.y) and (p.y <= 127) then
-		p.offscreen = false
-	end
-end
--->8
---draw
-
-function _draw()
-	--comment out for trails
-	cls()
-	
-	draw_phobos()
-	draw_demos()
-	draw_luna()
- --draw_target(target.x, target.y)
-
- --print(unpack(luna.x_history))
-	--print(demos.x)
-	--print(demos.y)
-	--print(phobos.x)
-	--print(phobos.y)
-	--print(target.x)
-	--print(target.y)
-	--print(dist)
-	--print(angle)
-	--print(force)
-	--print(phobos.f)
-	--print(demos.f)
-	--print(luna.f)
-	
-
-	
-end
-
-
 -->8
 --update
 
@@ -246,12 +241,6 @@ function _update60()
    end
    
  end
- planet_crash = false
-
-	planets = {}
-	add(planets, phobos)
-	add(planets, demos)
-	add(planets, luna)
 	
 	get_avg_change()	
 	move_planet(phobos, planets)
@@ -269,27 +258,84 @@ function _update60()
 end
 	
 -->8
+--functions
 
 function get_avg_change()
  
 	local avg_x = {}
 	local avg_y = {}
-	
+	sx = 0.0
+	sy = 0.0
 		for p in all(planets) do
 		add(avg_x, p.x)
 		add(avg_y, p.y)
-	end
-	
-	sx = 0.0
-	sy = 0.0
-	for i=1,#avg_x do
-		sx += avg_x[i]
-		sy += avg_y[i]
+		sx += p.x
+		sy += p.y
 	end
 	sx = sx / #avg_x
 	sy = sy / #avg_y
 end
 
+function tostring(any)
+    if type(any)=="function" then 
+        return "function" 
+    end
+    if any==nil then 
+        return "nil" 
+    end
+    if type(any)=="string" then
+        return any
+    end
+    if type(any)=="boolean" then
+        if any then return "true" end
+        return "false"
+    end
+    if type(any)=="table" then
+        local str = "{ "
+        for k,v in pairs(any) do
+            str=str..tostring(k).."->"..tostring(v).." "
+        end
+        return str.."}"
+    end
+    if type(any)=="number" then
+        return ""..any
+    end
+    return "unkown" -- should never show
+end
+
+function offscreen_check(p)
+	if p.x < 0 then 
+		p.ix = 0
+		p.offscreen = true
+	end
+	if p.y < 0 then 
+		p.iy = 0
+		p.offscreen = true
+	end
+	if p.x > 127 then 
+		p.ix = 126
+		p.offscreen = true
+	end
+	if p.y > 127 then 
+		p.iy = 126
+		p.offscreen = true
+	end
+	if (0 <= p.x) and (p.x <= 127) then
+		p.ix = p.x
+	end
+	if (0 <= p.y) and (p.y <= 127) then
+		p.iy = p.y
+	end
+	if (0 <= p.x) and (p.x <= 127) and (0 <= p.y) and (p.y <= 127) then
+		p.offscreen = false
+	end
+end
+
+function pythag(a,b)
+	--if a > 126 then a = 126 end
+	--if b > 126 then b = 126 end
+	return sqrt(a^2+b^2)
+end
 __gfx__
 000000000666d600000ffff088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000006666d6660fff99ff80088008332223330070000000000700000000700000000000000070000700000070000000000000000000000000000000000000
