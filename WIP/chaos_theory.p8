@@ -8,18 +8,37 @@ __lua__
 -- - a comet that comes by
 -- - portals/wormholes
 --     - and maybe they transfer gravity
+-- - when crash combine and avg velocity
 
 function _init()
+ cls()
+ 
+ srand(6)
+ --camera
+ --camera(-64,-64)
+ 
+ --use for periiodic cls
  blank_timer_max=600
  blank_timer=blank_timer_max
 
+ --trail parameters
  snapshot_rate=4
  snapshot_timer=snapshot_rate
- trail_length=50
-	cls()
+ trail_length=275
+	
+	--has a planet ever crashed
 	planet_crash = false
+	
+	--keep planets in here
 	planets = {}
+	
+	--speed and force limits
+	min_speed = -10
+	max_speed = 10
+	min_force = 0.01
+	max_force = 100
  
+ --define planets here
  phobos = {
  	x=rnd(128),
  	y=rnd(128),
@@ -31,8 +50,12 @@ function _init()
 	 iy=0,
 	 offscreen=false,
 	 history={},
-	 crashed=false
+	 crashed=false,
+	 sprite_main=2,
+	 sprite_offscreen=18,
+	 sprite_trail=34
  }
+	add(planets, phobos)
 
  demos = {
 	 x=rnd(128),
@@ -45,8 +68,12 @@ function _init()
 	 iy=0,
 	 offscreen=false,
 	 history={},
-	 crashed=false
+	 crashed=false,
+	 sprite_main=4,
+	 sprite_offscreen=20,
+	 sprite_trail=36
  }
+	add(planets, demos)
 
  luna = {
 	 x=rnd(128),
@@ -59,17 +86,20 @@ function _init()
 	 iy=0,
 	 offscreen=false,
 	 history={},
-	 crashed=false
+	 crashed=false,
+	 sprite_main=1,
+	 sprite_offscreen=17,
+	 sprite_trail=33
  }
+	add(planets, luna)
 
+ -- optional object used for
+ -- debugging and visualization
  target = {
 	 x=rnd(57)+70,
 	 y=rnd(57)+70
  }
 	
-	add(planets, phobos)
-	add(planets, demos)
-	add(planets, luna)
 end
 
 -->8
@@ -81,7 +111,6 @@ function move_planet(p)
   --do nothing
   p.vx=0
 	 p.vy=0
-	
 	else
 	
  	for f in all(planets) do
@@ -90,6 +119,7 @@ function move_planet(p)
  		local force=0
  		
  		if not(f==p) and not p.crashed then
+ 			--calculate distance
  			dist=pythag(f.x-p.x,f.y-p.y)
  			-- calc crash here
  			if dist < 2 then
@@ -102,31 +132,39 @@ function move_planet(p)
  			 f.vy=0
  			 break
  			end
- 			--dist = mid(0.01, dist, 100)
+ 			--get angle of force vec
  			angle = atan2(p.x-f.x,p.y-f.y)
+ 			--compute force of g per p
  			force = ((p.m * f.m * (6.67*10^-3)) / dist^2)
-   	force = mid(0.01, force, 100)
+   	force = min(force, max_force)
+   	force = max(force, min_force)
+ 			--record of ath force
  			p.f = max(force, p.f)
+ 			--get componants of force
  			p.vx=p.vx-force*cos(angle)
  			p.vy=p.vy-force*sin(angle)
  		end
  	end
  	
- 	p.vx = max(-10, p.vx)
- 	p.vx = min(p.vx, 10)
- 	p.vy = max(-10, p.vy)
- 	p.vy = min(p.vy, 10)
+ 	--speed limits
+ 	p.vx = max(min_speed, p.vx)
+ 	p.vx = min(p.vx, max_speed)
+ 	p.vy = max(min_speed, p.vy)
+ 	p.vy = min(p.vy, max_speed)
  
- 	--move
- 	--only two or less planets remain
- 	if planet_crash then
+ 	--actually move
+ 	--if planet_crash then
+ 	--only two 
+ 	--or less planets remain
+ 	--stop centering screen
  	 p.x+=p.vx -- (sx - 63)
  	 p.y+=p.vy -- (sy - 63)
- 	else
- 	 p.x+=p.vx - (sx - 63)
-   p.y+=p.vy - (sy - 63)
-  end
- 	
+ 	--else
+ 	 --subtract average to
+ 	 --keep the screen centered
+ 	-- p.x+=p.vx - (sx - 63)
+  -- p.y+=p.vy - (sy - 63)
+  --end
  end
 end
 
@@ -138,70 +176,31 @@ function _draw()
 	--comment out for trails
 	cls()
 	
-	draw_phobos()
-	draw_demos()
-	draw_luna()
+	for p in all(planets) do
+	 draw_trail(p)
+	end
+	
+	for p in all(planets) do
+	 draw_planet(p)
+	end
+
+	camera(sx-64,sy-64)
+
  --draw_target(target.x, target.y)
 
- --print(unpack(luna.x_history))
-	--print(demos.x)
-	--print(demos.y)
-	--print(phobos.x)
-	--print(phobos.y)
-	--print(target.x)
-	--print(target.y)
-	--print(sx)
-	--print(sy)
-	--print(angle)
-	--print(force)
-	--print(phobos.f)
-	--print(phobos.vx)
-	--print(phobos.vy)
-	--print(demos.f)
-	--print(demos.vx)
-	--print(demos.vy)
-	--print(luna.f)
-	--print(luna.vx)
-	--print(luna.vy)
-	--print(#planets)
-	
 end
 
-function draw_phobos()
-	-- now draw the trail
-	for i=1,#phobos.history,1 do
-	  spr(34, phobos.history[i]["x"], phobos.history[i]["y"])
-	end
-	if phobos.offscreen then
-		spr(18, phobos.ix, phobos.iy)
-	else
-		spr(2, phobos.x, phobos.y)
-	end
+function draw_planet(p)
+	spr(p.sprite_main, p.x, p.y)
 end
 
-function draw_demos()
+function draw_trail(p)
 	-- now draw the trail
-	for i=1,#demos.history,1 do
-	  spr(36, demos.history[i]["x"], demos.history[i]["y"])
+	for i=#p.history,1,-1 do
+	 spr(p.sprite_trail,
+	 p.history[i]["x"], 
+	 p.history[i]["y"])
 	end
-	if demos.offscreen then
-		spr(20, demos.ix, demos.iy)
-	else
-		spr(4, demos.x, demos.y)
-	end
-end
-
-function draw_luna()
-	-- now draw the trail
-	for i=1,#luna.history,1 do
-	  spr(33, luna.history[i]["x"], luna.history[i]["y"])
-	end
-	
-	if luna.offscreen then
-		spr(17, luna.ix, luna.iy)
-	else
-		spr(1, luna.x, luna.y)
-	end	
 end
 
 function draw_target(x,y)
@@ -215,43 +214,38 @@ end
 
 function _update60()
 	
+	--used for periodic cls
+	--only needed if main cls
+	--is commented out
 	blank_timer-=1
 	if blank_timer<0 then 
 		blank_timer=blank_timer_max 
 		cls()
 	end
 
+ --trail timing
+	local rec_snapshots=false
  snapshot_timer-=1
  if snapshot_timer<0 then
    snapshot_timer=snapshot_rate
-   -- record snapshots
-   add(phobos.history, {x=phobos.x, y=phobos.y})
-   if #phobos.history > trail_length then
-     deli(phobos.history, 1)
-   end
-
-   add(demos.history, {x=demos.x, y=demos.y})
-   if #demos.history > trail_length then
-     deli(demos.history, 1)
-   end
-   
-   add(luna.history, {x=luna.x, y=luna.y})
-   if #luna.history > trail_length then
-     deli(luna.history, 1)
-   end
-   
+   rec_snapshots=true
  end
 	
+	--avg position is needed in
+	--order to move the planets
+	--ie. do this first
 	get_avg_change()	
-	move_planet(phobos, planets)
-	move_planet(demos, planets)
-	move_planet(luna, planets)
 	
+	--actually move the planets
 	for p in all(planets) do
-		offscreen_check(p)
+	 move_planet(p)
+	 --offscreen_check(p)
+	 if rec_snapshots then
+    record_snapshot(p)
+  end
 	end
 	
-	-- target stays in a fixed position
+	-- target locaiton is avg pos
 	target.x = sx
 	target.y = sy
 
@@ -332,9 +326,14 @@ function offscreen_check(p)
 end
 
 function pythag(a,b)
-	--if a > 126 then a = 126 end
-	--if b > 126 then b = 126 end
 	return sqrt(a^2+b^2)
+end
+
+function record_snapshot(p)
+ add(p.history, {x=p.x, y=p.y})
+ if #p.history > trail_length then
+  deli(p.history, 1)
+ end
 end
 __gfx__
 000000000666d600000ffff088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
