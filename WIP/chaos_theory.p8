@@ -13,7 +13,7 @@ __lua__
 function _init()
  cls()
  
- srand(6)
+ srand(14)
  --camera
  --camera(-64,-64)
  
