@@ -1,0 +1,294 @@
+﻿<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>PICO-8 Cartridge</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+		<meta property="og:image" content="thumb.gif" />
+
+<STYLE TYPE="text/css">
+<!--
+canvas#canvas {width: 100vh; height: 93vh; display: block;}
+
+.pico8_el {
+	box-sizing:border-box;
+	float:center;
+	width:19.3%;
+	display:inline-block;
+	padding:4px;
+	text-align:center;
+	color:#FFF1E8;
+	background-color:#83769c;
+	font-family:verdana;
+	font-size:11px;
+	cursor:pointer;
+	cursor:hand;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+	vertical-align:middle;
+}
+
+.pico8_el:hover{
+	background-color:#FF77A8;
+}
+
+.center{
+	text-align:center;
+	/* Safari, Opera, and Chrome */
+	display:-webkit-box;
+	-webkit-box-pack:center;
+	-webkit-box-align:center;
+	/* Firefox */
+	display:-moz-box;
+	-moz-box-pack:center;
+	-moz-box-align:center;
+	/* Internet Explorer 10 */
+	display:-ms-flexbox;
+	-ms-flex-pack:center;
+	-ms-flex-align:center;
+
+	margin:0 0;
+	border:0px;
+}
+
+.plate{
+	visibility:hidden; /*for graceful loading*/
+	background-color:#000;
+	border:4px solid #000;
+	box-sizing:content-box;
+	box-shadow:0px 0px 20px #000;
+
+	-webkit-user-select:none; /* Chrome, Opera, Safari */
+	-moz-user-select:none; /* Firefox 2+ */
+	-ms-user-select:none; /* IE 10+ */
+	user-select:none; /* Standard syntax */
+	user-drag:none;
+	-webkit-user-drag:none;
+}
+
+canvas{
+	cursor:none;
+	outline:none;
+}
+
+.menubar{
+	box-sizing:border-box;
+	background-color:#000;
+    border-style:solid;
+    border-width:4px 0px 0px 0px;
+	border-color:#000;
+	visibility:hidden;
+
+	display:flex;
+    align-items:stretch;
+    justify-content:space-between;
+    width:100%;
+    margin:0;
+    padding:0;
+}
+
+.startbutton{
+	position:absolute;
+	left:0; right:0;
+	top:0; bottom:0;
+	margin-left:auto; margin-right:auto;
+	margin-top:auto; margin-bottom:auto;
+	width:96px; height:96px;
+	cursor:pointer;
+	cursor:hand;
+}
+
+.pixels{
+	image-rendering:optimizeSpeed;
+	image-rendering:-moz-crisp-edges;
+	image-rendering:-webkit-optimize-contrast;
+	image-rendering:optimize-contrast;
+	image-rendering:pixelated;
+	-ms-interpolation-mode:nearest-neighbor;
+}
+
+-->
+</STYLE>
+
+</head>
+
+<body bgcolor=#5F574F class=center style="height:100%;border:0px;overflow:hidden;" leftmargin=0 topmargin=0> <!-- margins for chrome (defaults on 8) -->
+
+	<div id="plate" class=plate oncontextmenu="return false;">
+
+	<!-- the itch app messes with the first found canvas -->
+	<canvas id="dummy4itchapp" style="position:absolute;visibility:hidden;width:0;height:0;"></canvas>
+
+	<div id="frame" class=center style="visibility:hidden;"> <!-- firefox can't resize a fullscreen canvas (?)-->
+	<canvas class="emscripten pixels" id="canvas" oncontextmenu="event.preventDefault()" tabindex="1"></canvas>
+	</div>
+
+	<div id="start" class="startbutton pixels" onclick="loadCart();">
+	<img alt="START" height=72 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAaklEQVR4Ae2dOwoAMQhE15A+rfc/3bZ7AlMnQfywCkKsfcgMM9ZP+QHtIn0vLeBAFduiFdQ/0DmvtR5LXJ6CPSXe2ZXcFNlTxFbemKrbZPs35XogeS9xeQr+anT6LzoOwEDwZJ7jwhXUnwkTTiDQ2Ja34AAAABB0RVh0TG9kZVBORwAyMDExMDIyMeNZtsEAAAAASUVORK5CYII="/>
+	</div>
+
+	<center>
+	<div id="menubar" class=menubar>
+
+		<div class=pico8_el onclick="Module.pico8Reset();">
+		<img alt="Reset" height=12 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAqCAYAAADxughHAAAA4WlDQ1BzUkdCAAAYlWNgYDzNAARMDgwMuXklRUHuTgoRkVEKDEggMbm4gAE3YGRg+HYNRDIwXNYNLGHlx6MWG+AsAloIpD8AsUg6mM3IAmInQdgSIHZ5SUEJkK0DYicXFIHYQBcz8BSFBDkD2T5AtkI6EjsJiZ2SWpwMZOcA2fEIv+XPZ2Cw+MLAwDwRIZY0jYFhezsDg8QdhJjKQgYG/lYGhm2XEWKf/cH+ZRQ7VJJaUQIS8dN3ZChILEoESzODAjQtjYHh03IGBt5IBgbhCwwMXNEQd4ABazEwoEkMJ0IAAHLYNoSjH0ezAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAGrklEQVRogd1ZS28TVxT+zmSwneAkduI8DLZ51A4xJKgQuuBVRQiJkAXdFcKq8AeKsmNdxH+oYEs3LIqQWDRVWRS1BIpSiUAJefB0SZWHIHgMqInndDHPOw97Qpyq6lGuPHPv3HO+c+953RsiEKPGJEl16OzsQDgcAQEAEQjA8vIylJKCYlHB8vLfNZVJEiRTEUbNdTLEON5rL0e2yyCmdVJmvRbIImndJfxLRGv3EXIZjpNWv8sEIoMr63+VechB2MaaY4jH42iONZuCYH8i+FoPA2BWRZDVBJL11cLiAgqFQlXrDKRIOpPGnk/3oKenx7ZSTsBsfxEeWVVFgFRZGQYAZjAzRu/cQeFloSrGqooQCOl0GgcPHcLxgQGPDwhkbosdDeugNEAmNzK4+oA3TQkgAsrlMq5d+36timi22lDfgERrK1LplEOyjt9vef3MgXzGXb5AiMfjlSHqVFERc6Gre3PNUkUAD/IkUxFPBkF4su3XULqaEvo4q9oDEfnLIoJEkmlyblZap7Aj27ZtQz6fdzAC+vb2IZlMesp59OgRnj1/ZipCIITCIezdsxexeEz4tlR6hz8LBcz+NYuSUoKqR7NEawKbU5uRTCYhy6KRbNmSweDgoE0HTaH74/dReFkAQUviwqwd3d04NTRk10FntgXpdFq0bf15bGwMP4yMmM4NIjQ1NSKTybgUKRaLGH/wAHdGR/FqdtYMyzt37sSBAwfR1tbmUiSXzWHIhskICoqiaGHZwkMskcQSSTx8bpjLK2VbU1ktq8xlZlZZJFVr574+xxLVCa29rZ1//eW2+Y3Rpien+cI3F3hXfhfXSdb3R/qP8KVvL3HxreKawyqzWnY2lc9+ddbETSAW1CciSJKjavG1XX2X2ZnwNNv3msYw5jBYZdO+VWZUytzu1KV1WGHd8JFqYdJXwkeO1YCcisv2zvWvUWsgw4eBVLEYCxhGPYdYHxcaW9m7xiQbeMgPWRWZA8eOIdbcLHYSMDIygh9HRjzZnfzypMB269at2N3bi3AoVB2xj8nKVgYja+V8PdU9NnB8AAOOGmxhcQEnTnyB0dHbQn8um8OpoVM4PXQaO7p3BEueviQCcR2stGrVO4tW5GlrVK3QsJc9NQoK/5sTYqDzCIDarBwBEknu/fKrhldB5o6wzpCCVLtByJMHVS4Q10C2HTFqpVWW0ixmWABQWYVEEurq6oR+o2pglfXsb9zakEf2Xh3J2nyH5/lEKFcfA5cvX8b169cFZSKRCM6cOYPz58/b6gvG0tISZqZncPHiRbx+/dqc07u7F/39/Th8+HPU10c+ThFXj1f4rRCOH/7xEDdu3BCSXKI1geHhYezfv184o0xPTWNmega/3buHxxMT5pzSuxK2b9+OlZUV//Bvx+HhS8LBiqyXymTkG0Ao/lxCPcKsygxmVZjDHuZZMcc43IxAawi/H2PTRjARrpMcHhnwDoDImslge9RiqMxQVRVQXSxcgIw5lcYF4fqvJEnWTQo5WwXw9prNfHSW8TopxSIKhQKIJEgSmVElEqlHQ0MD6hucjkiIxWJIpVJCgGhpaUU4FLaU0sdkWUZzUzM6OzqhKCXzjqytvR3RaNQ6C9nAl0olvHnzxjqz67moVFIEJIIik5OTuHr1qiaAjTspIJfLIZ/vRleuS7B5ImDfZ/vw4cMHqLqNE4CN0Y1ItCVE/2AgGo0in89jcHAQc/Pz5vAn2Syy2SxkeYNrJ2ZmZvDTzZv6YUzVz/mEJ0+e2JaTREUmHk9A+U6xTif6Ihw9ehRNjY3o6uqCk/r6+pDJZDRBrE2QZRmJRMIFqrGxET09PUilUpryqgoQoTEaRbylBRs2yK57gampKVy5ckXnrQUWAuH5ixf+OzI3N4f5uXmX7edyWSy9fetSAgCSm5JIbkpawu3h03FFFA6H0ZHsQEeyQ1sklW3+RCB76NH7FxYW8PvYmIDJSqQWeVS/Xg6sxwcWPnS/2wB4sBAVZJgmbE5zOLSBx4nJC6Nn+LUHRCPIaVHNI5zZBTuVq0YSQHVi/aVbkMi/CrnutTznErC4uIjJyUncvXtXC5/61hqm4VXNkj1rsdiv6rfzJFklkXV5rQUYY+rTZ089ENqzpfbsU8YLe4vnL57j1s+3MPtq1hRuXOmYBykiyz30sEoORewgfRdad2hjVx6MjwdQA0H+Y0UIh0IIRyIIh0MQnYBtK086CN8K3sBpKuisSgye1hTC+/fvUVSKlSEGVcRLiPc3tb8dCUpVaq2gB+vVenntKUDRSD7P/y36B1GPDeCw8WuTAAAAAElFTkSuQmCC"/>
+		</div>
+
+		<div class=pico8_el onclick="Module.pico8TogglePaused();">
+		<img alt="Pause" height=12 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAPUlEQVR4Ae3doQ0AIAxEUWABLPtPh2WCq26DwFSU/JPNT166QSu/Hg86W9dwLte+diP7AwAAAAAAgD+A+jM2ZAgo84I0PgAAABB0RVh0TG9kZVBORwAyMDExMDIyMeNZtsEAAAAASUVORK5CYII="/>
+		</div>
+
+		<div class=pico8_el onclick="toggle_z();">
+		<img alt="Toggle_Z" height=12 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADEAAAAqCAYAAAAajbNEAAAA4WlDQ1BzUkdCAAAYlWNgYDzNAARMDgwMuXklRUHuTgoRkVEKDEggMbm4gAE3YGRg+HYNRDIwXNYNLGHlx6MWG+AsAloIpD8AsUg6mM3IAmInQdgSIHZ5SUEJkK0DYicXFIHYQBcz8BSFBDkD2T5AtkI6EjsJiZ2SWpwMZOcA2fEIv+XPZ2Cw+MLAwDwRIZY0jYFhezsDg8QdhJjKQgYG/lYGhm2XEWKf/cH+ZRQ7VJJaUQIS8dN3ZChILEoESzODAjQtjYHh03IGBt5IBgbhCwwMXNEQd4ABazEwoEkMJ0IAAHLYNoSjH0ezAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAEvklEQVRogd1ZS28TVxT+ztgCe4xS29kYUzuhUgmKssEIklCWVGUdqWKV8g/a/paK/wBIULZFXpeFs0mNYoFsKUqMnch2nGYcRxlHndPFvF+eGecB4ZNGHt/neZ9z7xCBGJccgvpDIBAA+qzETAoB0Einy8qCoYnLDbp4nyC7xslsYTCY1bcoiAcNyGSymM5mkc6kzUY2tzEIIts/X7iHmUyxY/FOt4utrS0EMRXIRLFYROnOHSwsLNg21yVGIFWfZ+ZQ5lrv/n6H7e0tbS9/jGWCQCgUCvjh4UM8fvyTGsNIfbQBNlOYGOw9X5ZlvHr9KnB6XBWvDwEEJBIJZNJpXM9dd0t8UumH4ZeBqampUMsJFMaWCZoGQq15Noiwl5onPBnRTGfc7HOOa167GyZt6Yszw5KryTpac9rzJTQMyEGXtZ3BiKsuRZiezqJQKKDwbQFXrl4BQBCIsLi4iBv5G57MVKtVNBqNYAI0t3M7r0peOpPB8vIyEomrtt6b393EysqKa812u41m8xNarZZqDQRiAvGDpQf87I9n3O30mP9jZiX4+e3X31mfP8kjQOCYEOP79+5zu9VW9w3xvPnzDT/5+QnHhBgTBHaFWLrAOpC1xMaKf3T0bCYBIEBRGABbaidyvYQi47Rg9ljFKkgPcsjIT+pMrYq1e3u43XE+0clKvA8jzoATWHZ8qSAQBBL06GRGjcC8YF/FU9WimMLTp7+gWJwxG5nR2+uh+k8V6+vr6Pa6/mt6gX3+EgAmiya0rBwN7vGimMTq6iqWlpZsu9brdbx4+RLbzaY/E2MId3aa4ZrP/lDkqUsCSPAXEGECATLAbHHss8OFxWYbzsexPUyBmcGseHf6zAkcp73HPTtPAQZjdDLCSB4ZimFmyLKMk5MTLUG56Yp6HrHOiZuNDIWViYnXIcsjlMtlbG5uqplVW313Zxfvq+8xkKTxlE1gkSYTWvo/nUIYsnyMcrmMtbU1m5MPj4Zot9qQBmOYmBAWn2DN20OyYZTwZDOF0WiESqVypkR6bG2DUXboeuSgU7kT5BNWzwm6oHUBEsihiajGpDHAxCAOx4hzj6hFs1756snZKDsAYCSPsN/fR7PZxOHhobYBQUyJSKVSEEXRxUA2O43Z2dlozDuqViIgn88jFou5hkrSAP29PctlFUNRFHQ6HQyHQ+OwZTDR3++jWq1CYcVG8K3vb2F+fh5zc3Mukd0tlSAfH9tNcIJjbT6fRzKRdM1pNOp4+9dbg1u9u1araZdqFiYYjG6ni0qlgg8fPyAeixvEPPrxEaa+mVKZcKB0t4SZ2RnbdaDVPwwNscUMPJBMJpEUk672Rr2B5y+em4tri0mShIN/D7RoajGn4dEQw6MhWu2W7VZv7vZtDKSBZwjP5XLI5XJmg3OAI7uys1M3b5/is7/fx8bGhmOKWxKeZYdKsEm2emPJONXFk8vCVKccd50dNur51E7q7bQazaI5bRRfUCNbyLk+WgACC0A2tMD65XEQokfp4KXGMACEqGIl6QDNT03UajUIghBc94/Z0DY3gDAA2N3ZCTUu8CNLKpXCtdQ1iCnxwjKzzuyBJKEX4hT4Gb4UhYH9s0sQvtDbjmhy/So+PH4VTPwPl0QwHGj5aPQAAAAASUVORK5CYII="/>
+		</div>
+
+
+	</div>
+	</center>
+
+	</div>
+</body></html>
+
+<script type="text/javascript">
+
+	var autoresize=false; // enables autoresize. duh.
+	var autoplay=true; // enables autoplay when possible.
+
+	var canvas = document.getElementById("canvas");
+	var plate = document.getElementById("plate");
+
+	// show Emscripten environment where the canvas is
+	// arguments are passed to PICO-8
+
+	var Module = {};
+	Module.canvas = canvas;
+
+	/*
+		// When pico8_buttons is defined, PICO-8 takes each int to be a live bitfield
+		// representing the state of each player's buttons
+
+		var pico8_buttons = [0, 0, 0, 0, 0, 0, 0, 0]; // max 8 players
+		pico8_buttons[0] = 2 | 16; // example:player 0, RIGHT and Z held down
+
+		// when pico8_gpio is defined, reading and writing to gpio pins will
+		// read and write to these values
+		var pico8_gpio = new Array(128);
+	*/
+
+	// key blocker. prevent cursor keys from scrolling page while playing cart.
+
+	function onKeyDown_blocker(event) {
+		event = event || window.event;
+		var o = document.activeElement;
+		if (!o || o == document.body || o.tagName == "canvas" || o.tagName == "CANVAS")
+		{
+			if ([9, 32, 37, 38, 39, 40].indexOf(event.keyCode) > -1)
+			{
+				if (event.preventDefault) event.preventDefault();
+			}
+		}
+	}
+
+	document.addEventListener('keydown', onKeyDown_blocker, false);
+
+	//------------------------- RESIZE
+
+	function resizeCanvas()
+	{
+		var csize=512;
+		var width=window.innerWidth,height=window.innerHeight;
+		var fs=(document.fullscreenElement || document.mozFullScreenElement || document.webkitIsFullScreen || document.msFullscreenElement);
+		if (autoresize || fs)
+		{
+			if (!fs) height-=32; //keep room for buttons
+			csize=Math.max(128,Math.min(Math.floor(width/128)*128,Math.floor(height/128)*128));
+		}
+
+		plate.style.visibility="visible";//graceful resizing on load
+		plate.style.width=csize; // otherwise larger buttons but black side bars with autoresize (stylish?)
+		canvas.style.width = csize;
+		canvas.style.height = csize;
+		window.focus();
+	}
+
+	window.addEventListener('load', resizeCanvas, false);
+	window.addEventListener('resize', resizeCanvas, false);
+	window.addEventListener('orientationchange', resizeCanvas, false);
+	window.addEventListener('fullscreenchange', resizeCanvas, false);
+	window.addEventListener('webkitfullscreenchange', resizeCanvas, false);//for itch.app
+
+	// ==========================================================================================
+	// chrome autoplay policy may2018
+	// ==========================================================================================
+
+	var cartLoaded=false;
+
+	function loadCart()
+	{
+		if (cartLoaded) return;
+		document.getElementById("start").style.visibility="hidden";
+		document.getElementById("frame").style.visibility="visible";
+
+		var script = document.createElement('script');
+		script.type='text/javascript';
+		script.async=true;
+		script.src="##js_file##";
+
+		var loadFunction = function ()
+		{
+			cartLoaded=true;
+			document.getElementById("menubar").style.visibility="visible";
+			resizeCanvas();
+		}
+		script.onload = loadFunction;
+		script.onreadystatechange = loadFunction;
+
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(script,s);
+	};
+
+	if (autoplay)
+	{
+		var context = new AudioContext();
+		context.onstatechange = function ()
+		{
+			if (context.state=='running')
+			{
+				loadCart();
+				context.close();
+			}
+		};
+	}
+
+    var pico8_buttons = [0, 0, 0, 0, 0, 0, 0, 0];
+    var z_pressed = false
+
+    function toggle_z() {
+    	z_pressed = !z_pressed
+    	//if (pico8_buttons[0] == 0) {pico8_buttons[0] = 16} else {pico8_buttons[0] = 0}
+    }    
+
+// Array through which we'll communicate with PICO-8.
+var pico8_buttons = [0];
+// Start polling gamepads.
+requestAnimationFrame(updateGamepads);
+
+// Workhorse function, updates pico8_buttons once per frame.
+function updateGamepads() {
+  pico8_buttons[0]=0
+  var bitmask = 0;
+  // buttons (mapped twice for user convenience)
+  bitmask |= (z_pressed) ?16:0;
+  // update actual array
+  pico8_buttons[0] |= bitmask;
+
+  if (z_pressed) {toggle_z()};
+
+  // restart next frame.
+  requestAnimationFrame(updateGamepads);
+}
+
+
+</script>

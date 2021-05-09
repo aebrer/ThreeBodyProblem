@@ -15,6 +15,8 @@ function _init()
  --camera(-64,-64)
  
  debug_string = ""
+ 
+ collision_distance=4
 
  --reset timer
  reset_timer=8
@@ -36,7 +38,7 @@ function _init()
 	--speed and force limits
 	min_speed = -10
 	max_speed = 10
-	min_force = 0.01
+	min_force = 0.005
 	max_force = 100
  
  --define planets here
@@ -241,7 +243,7 @@ function move_planet(p)
  		--calculate distance
  		dist=pythag(p2.x-p.x,p2.y-p.y)
  		-- calc crash here
- 		if dist < 2 then
+ 		if dist < collision_distance then
  		 p.crashed = true
  		 p2.crashed = true
  		 
@@ -343,14 +345,25 @@ end
 function _draw()
 	--comment out for trails
 	cls()
-	print(title, 30, 60)
-	print('press ❎ to reset')
-	print('mobile: tap power btn')
-	print('seed: '..tostring(seed))
-	--print(debugstring)
 	
 	for name, p in pairs(planets) do
 	 draw_trail(p)
+	end
+	
+	print(title, 30, 60)
+	print('press x/❎ to reset')
+	print('press z/🅾️ to alter')
+	print('seed: '..tostring(seed))
+	--print(debugstring)
+	
+	if alter_pressed then
+	 print(alter_statement, sx-63, sy-63)
+	 if alter_stmt_decay < 0 then
+	  alter_stmt_decay = alter_stmt_rate
+	  alter_pressed = false
+	 else
+	  alter_stmt_decay-=1
+	 end
 	end
 	
 	for name, p in pairs(planets) do
@@ -490,7 +503,10 @@ function _update60()
 	end 
 	
 	if btn(4) then
-  reset_needed=true
+  --reset_needed=true
+	 --z/🅾️ button
+	 inc_min_force()
+	 alter_pressed = true
 	end 
 	
 	if btn(5) then
@@ -623,19 +639,33 @@ function get_trail(p)
  trail.sprite_trail=p.sprite_trail
  return(trail)
 end
-
+ 
 -->8
 -- seed
 
-title = "tbp_017"
+title = "tbp_018"
 
-seeds={18,19,23,25,26,31,32,
-       33,37,39,41,45
+seeds={52,58,66,70,71,74,79,
+       80,90,92,96,100,107,
+       110,
       }
 i = flr(rnd(#seeds) + 1)
 seed = seeds[i]
 srand(seed)
---srand(45)
+--srand(110)
+-->8
+-- alter
+
+alter_statement = ""
+alter_stmt_rate = 120
+alter_stmt_decay = alter_stmt_rate
+alter_pressed = false
+
+function inc_min_force()
+ min_force = min_force * 1.10
+ text = "min_force increased to "
+ alter_statement = text..tostring(min_force)
+end
 __gfx__
 000000000666d600000ffff088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000006666d6660fff99ff80088008332223330000000000000000000000000000000000000000000700000000000000000000000000000000000000000000
