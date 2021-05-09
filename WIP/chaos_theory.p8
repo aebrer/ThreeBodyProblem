@@ -343,9 +343,9 @@ end
 --draw
 
 function _draw()
-	--comment out for trails
 	cls()
-	
+	camera(sx-64,sy-64)
+
 	for name, p in pairs(planets) do
 	 draw_trail(p)
 	end
@@ -353,7 +353,7 @@ function _draw()
 	print(title, 30, 60)
 	print('press x/❎ to reset')
 	print('press z/🅾️ to alter')
-	print('seed: '..tostring(seed))
+	print('seed: '..tostring(seed), sx-63, sy+59)
 	--print(debugstring)
 	
 	if alter_pressed then
@@ -384,7 +384,6 @@ function _draw()
   end
  end
 
-	camera(sx-64,sy-64)
 
 	--for i=#stars,1,-1 do
 	-- draw_star(stars[i])
@@ -644,13 +643,17 @@ end
 -- seed
 
 title = "tbp_018"
-
-seeds={52,58,66,70,71,74,79,
-       80,90,92,96,100,107,
-       110,
-      }
-i = flr(rnd(#seeds) + 1)
-seed = seeds[i]
+seed = flr(rnd(-1)) + 1
+reserved_seeds = {1, 100}
+while seed >= reserved_seeds[1] and seed <=reserved_seeds[2] do
+ seed = flr(rnd(-1)) + 1
+end
+--seeds={52,58,66,70,71,74,79,
+--       80,90,92,96,100,107,
+--       110,
+--      }
+--i = flr(rnd(#seeds) + 1)
+--seed = seeds[i]
 srand(seed)
 --srand(110)
 -->8
