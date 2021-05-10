@@ -665,7 +665,7 @@ alter_stmt_decay = alter_stmt_rate
 alter_pressed = false
 
 function inc_min_force()
- min_force = min_force * 1.10
+ min_force = min_force * 1.01
  text = "min_force increased to "
  alter_statement = text..tostring(min_force)
 end

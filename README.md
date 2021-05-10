@@ -19,4 +19,5 @@
 15. interactive https://www.hicetnunc.xyz/objkt/68110
 16. migration https://www.hicetnunc.xyz/objkt/69610
 17. I love you Mom https://www.hicetnunc.xyz/objkt/70401
-18. press Z to alter https://www.hicetnunc.xyz/objkt/72395
+18. press Z to alter (burned)
+18. ALTER https://www.hicetnunc.xyz/objkt/72935
