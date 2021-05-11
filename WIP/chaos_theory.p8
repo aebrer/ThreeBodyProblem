@@ -15,8 +15,23 @@ function _init()
  --camera(-64,-64)
  
  debug_string = ""
+ f=false
+ t=true
  
- collision_distance=4
+ --api
+ alter_stmt_decay = 0
+ alter_effect_decay = 0
+ alter_stmt_needed=true
+ alter_title = "relax"
+ alter_num = "019"
+ title = "tbp_"..alter_num
+ title = title.."_"
+ title = title..alter_title
+ 
+ 
+ --physics
+ collision_distance = 4
+ rad_o_g = 2
 
  --reset timer
  reset_timer=8
@@ -220,7 +235,7 @@ function _init()
 	end
 
  --average positions
- first_avg = true
+ first_avg = t
  sx = 0.0
 	sy = 0.0
 	delta_sx = 0.0
@@ -241,7 +256,7 @@ function move_planet(p)
  	
  	if not(p2==p) and not p.crashed then
  		--calculate distance
- 		dist=pythag(p2.x-p.x,p2.y-p.y)
+ 		dist=approx_dist(p2.x-p.x,p2.y-p.y)
  		-- calc crash here
  		if dist < collision_distance then
  		 p.crashed = true
@@ -315,7 +330,7 @@ function move_planet(p)
  		--get angle of force vec
  		angle = atan2(p.x-p2.x,p.y-p2.y)
  		--compute force of g per p
- 		force = ((p.m * p2.m * (6.67*10^-3)) / dist^2)
+ 		force = ((p.m * p2.m * (6.67*10^-3)) / dist^rad_o_g)
   	force = min(force, max_force)
   	force = max(force, min_force)
  		--record of ath force
@@ -352,18 +367,13 @@ function _draw()
 	
 	print(title, 30, 60)
 	print('press x/❎ to reset')
-	print('press z/🅾️ to alter')
+	local at = alter_title
+	print('press z/🅾️ to '..at)
+	print('seed: '..tostring(seed), sx-63, sy+59)
 	print('seed: '..tostring(seed), sx-63, sy+59)
 	--print(debugstring)
-	
-	if alter_pressed then
+	if alter_stmt_needed then
 	 print(alter_statement, sx-63, sy-63)
-	 if alter_stmt_decay < 0 then
-	  alter_stmt_decay = alter_stmt_rate
-	  alter_pressed = false
-	 else
-	  alter_stmt_decay-=1
-	 end
 	end
 	
 	for name, p in pairs(planets) do
@@ -481,10 +491,27 @@ function _update60()
   end
 	end
 	
-	-- target locaiton is avg pos
-	target.x = sx
-	target.y = sy	
-
+	--alter logic
+ if alter_stmt_decay < 0 then
+	 local as = alter_stmt_rate
+	 alter_stmt_decay = as
+	 alter_stmt_needed=false
+	end
+ 
+ 
+ if alter_pressed then
+  if alter_effect_decay<0 then
+   local aer=alter_effect_rate
+   alter_effect_decay=aer
+   alter_pressed = false
+  end
+  alter_stmt_needed=true
+	end
+	
+	alter_effect_decay-=1	 
+	alter_stmt_decay-=1
+	
+	--controls
 	if btn(0) then
 	 reset_needed=true
 	end 
@@ -504,7 +531,9 @@ function _update60()
 	if btn(4) then
   --reset_needed=true
 	 --z/🅾️ button
-	 inc_min_force()
+	 --018--inc_min_force()
+	 --019--:
+	 rad_o_g = inc_rad_o_g(rad_o_g)
 	 alter_pressed = true
 	end 
 	
@@ -616,6 +645,15 @@ function pythag(a,b)
 	return sqrt(a^2+b^2)
 end
 
+function approx_dist(dx,dy)
+ local maskx,masky=dx>>31,dy>>31
+ local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
+ if a0>b0 then
+  return a0*0.9609+b0*0.3984
+ end
+ return b0*0.9609+a0*0.3984
+end
+
 function record_snapshot(p)
  add(p.history, {x=p.x, y=p.y})
  if #p.history > trail_length then
@@ -642,7 +680,6 @@ end
 -->8
 -- seed
 
-title = "tbp_018"
 seed = flr(rnd(-1)) + 1
 reserved_seeds = {1, 100}
 while seed >= reserved_seeds[1] and seed <=reserved_seeds[2] do
@@ -655,19 +692,44 @@ end
 --i = flr(rnd(#seeds) + 1)
 --seed = seeds[i]
 srand(seed)
---srand(110)
+--srand(-17784)
+
+good_seeds = {
+ -17784,
+ 11020,
+}
 -->8
 -- alter
 
 alter_statement = ""
-alter_stmt_rate = 120
-alter_stmt_decay = alter_stmt_rate
+alter_stmt_rate = 240
+alter_effect_rate = 12
 alter_pressed = false
 
+--018
 function inc_min_force()
  min_force = min_force * 1.01
  text = "min_force increased to "
  alter_statement = text..tostring(min_force)
+end
+
+--019
+function inc_rad_o_g(r)
+ local new_rad = nil
+ if alter_effect_decay<0 then
+  if r == 6 then
+   new_rad = 1
+  else
+   new_rad = r+1
+  end
+ else
+  new_rad = r
+ end
+ 
+ text="rad^█_of_grav● = "
+ alter_statement = text..new_rad
+
+ return new_rad
 end
 __gfx__
 000000000666d600000ffff088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
