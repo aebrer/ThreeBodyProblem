@@ -22,8 +22,8 @@ function _init()
  alter_stmt_decay = 0
  alter_effect_decay = 0
  alter_stmt_needed=true
- alter_title = "relax"
- alter_num = "019"
+ alter_title = "stars"
+ alter_num = "020"
  title = "tbp_"..alter_num
  title = title.."_"
  title = title..alter_title
@@ -230,9 +230,9 @@ function _init()
 	star_spr_max = 11
 	star_decay_rate = 15
 	stars = {}
-	for i=n_stars,1,-1 do
-	 add(stars, generate_star())
-	end
+	--for i=n_stars,1,-1 do
+	-- add(stars, generate_star())
+	--end
 
  --average positions
  first_avg = t
@@ -361,6 +361,13 @@ function _draw()
 	cls()
 	camera(sx-64,sy-64)
 
+	for i=#stars,1,-1 do
+	 draw_star(stars[i])
+	 --move stars
+  stars[i].x += delta_sx
+  stars[i].y += delta_sy
+	end
+
 	for name, p in pairs(planets) do
 	 draw_trail(p)
 	end
@@ -393,15 +400,6 @@ function _draw()
    deli(p.history, 1)
   end
  end
-
-
-	--for i=#stars,1,-1 do
-	-- draw_star(stars[i])
-	 -- move stars
- -- stars[i].x += delta_sx
- -- stars[i].y += delta_sy
-	--end
-
 end
 
 function draw_planet(p)
@@ -503,6 +501,7 @@ function _update60()
   if alter_effect_decay<0 then
    local aer=alter_effect_rate
    alter_effect_decay=aer
+   alter_stars()
    alter_pressed = false
   end
   alter_stmt_needed=true
@@ -532,8 +531,8 @@ function _update60()
   --reset_needed=true
 	 --z/🅾️ button
 	 --018--inc_min_force()
-	 --019--:
-	 rad_o_g = inc_rad_o_g(rad_o_g)
+	 --019--rad_o_g = inc_rad_o_g(rad_o_g)
+	 --020--alter_stars
 	 alter_pressed = true
 	end 
 	
@@ -664,8 +663,8 @@ end
 function generate_star()
  local star = {}
  star["sprite"]=(rnd(star_spr_max-star_spr_offset)+star_spr_offset)
- star["x"]=rnd(164) - 30
-	star["y"]=rnd(164) - 30
+ star["x"]=sx - (rnd(64) * rand_sign())
+	star["y"]=sy - (rnd(64) * rand_sign())
 	star["twinkle_rate"]=star_decay_rate
  return(star)
 end
@@ -676,7 +675,16 @@ function get_trail(p)
  trail.sprite_trail=p.sprite_trail
  return(trail)
 end
- 
+
+function rand_sign()
+ local coin_toss = rnd(1)
+ if coin_toss >= 0.5 then
+  factor = -1
+ else
+  factor = 1
+ end
+ return(factor)
+end
 -->8
 -- seed
 
@@ -697,13 +705,17 @@ srand(seed)
 good_seeds = {
  -17784,
  11020,
+ 10473,
+ -20105,
+ 2340,
+ 25336
 }
 -->8
 -- alter
 
 alter_statement = ""
 alter_stmt_rate = 240
-alter_effect_rate = 12
+alter_effect_rate = 5
 alter_pressed = false
 
 --018
@@ -725,11 +737,16 @@ function inc_rad_o_g(r)
  else
   new_rad = r
  end
- 
  text="rad^█_of_grav● = "
  alter_statement = text..new_rad
-
  return new_rad
+end
+
+--020
+function alter_stars()
+ add(stars, generate_star())
+ text="number of stars = "
+ alter_statement = text..tostring(#stars)
 end
 __gfx__
 000000000666d600000ffff088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
