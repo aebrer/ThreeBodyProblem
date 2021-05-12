@@ -135,7 +135,9 @@ function _init()
  local len_out_u = a[1]-b[1]
  while inc <= n_vert_lines do
   local pixel_inc = (flr(len_out_l/n_vert_lines)) * inc
-  out_u(pixel_inc)
+  if inc>=4 then
+   out_u(pixel_inc)
+  end
   inc+=1
  end
  
@@ -945,7 +947,7 @@ end
 --020
 function alter_stars()
  add(stars, generate_star())
- text="number of stars = "
+ text="# of stars = "
  alter_statement = text..tostring(#stars)
 end
 __gfx__
