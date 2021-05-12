@@ -22,3 +22,4 @@
 18. press Z to alter (burned)
 18. ALTER https://www.hicetnunc.xyz/objkt/72935
 19. RELAX https://www.hicetnunc.xyz/objkt/73402 
+20. STARS https://www.hicetnunc.xyz/objkt/75725
