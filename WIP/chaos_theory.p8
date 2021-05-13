@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 32
 __lua__
+
 --init
 
 -- to do: 
@@ -18,12 +19,57 @@ function _init()
  f=false
  t=true
  
- --api
+ --window stuff
+ window_line_counter=1
+ window_lines = {}
+ n_hori_lines = 8
+ n_vert_lines = 8
+ 
+ -- need to declare some fixed
+ -- points first, will make this
+ -- a lot easier
+ 
+ --outer box
+ local a={8,8}
+ local b={120,8}
+ local c={8, 120}
+ local d={120,120}
+
+ --inner box
+ local e={24,24}
+ local f={104,24}
+ local g={24,104}
+ local h={104,104}
+ 
+ --outer box
+ add_line(a,b)
+ add_line(b,d)
+ add_line(d,c)
+ add_line(c,a)
+ 
+ --inner box
+ add_line(e,f)
+ add_line(f,h)
+ add_line(h,g)
+ add_line(g,e)
+ 
+ --diagonals
+ add_line(ofst(a, 16, 0), ofst(d, -16, 0))
+ add_line(ofst(e, -20, 24), ofst(h, 20, -24))
+
+
+ --alter
  alter_stmt_decay = 0
  alter_effect_decay = 0
  alter_stmt_needed=true
- alter_title = "stars"
- alter_num = "020"
+ alter_statement = ""
+ alter_stmt_rate = 120
+ alter_effect_rate = 60
+ alter_pressed = false
+
+ --title
+ alter_title = "awake/dream"
+ alter_num = "021"
  title = "tbp_"..alter_num
  title = title.."_"
  title = title..alter_title
@@ -58,73 +104,77 @@ function _init()
  --define planets here
  phobos = {
   name="phobos",
- 	x=rnd(128) * 1.0,
- 	y=rnd(128) * 1.0,
- 	m=15.0,
- 	vx=rnd(0.2),
-	 vy=rnd(1.0)+0.2,
-	 f=0,
-	 ix=0,
-	 iy=0,
-	 offscreen=false,
-	 history={},
-	 crashed=false,
-	 sprite_main=2,
-	 sprite_offscreen=18,
-	 sprite_trail=34,
-	 spr_range_x=1,
-	 spr_range_y=1
+    --x=rnd(128) * 1.0,
+    --y=rnd(128) * 1.0,
+    x=-64,
+    y=30,
+    m=15.0,
+    --vx=rnd(0.2),
+    --vy=rnd(1.0)+0.2,
+    vx=0.2,
+    vy=0.1,
+    f=0,
+    ix=0,
+    iy=0,
+    offscreen=false,
+    history={},
+    crashed=false,
+    sprite_main=2,
+    sprite_offscreen=18,
+    sprite_trail=34,
+    spr_range_x=1,
+    spr_range_y=1
  }
-	planets["phobos"] = phobos
+ planets["phobos"] = phobos
 	
  demos = {
   name="demos",
-	 x=rnd(128) * 1.0,
-	 y=rnd(128) * 1.0,
-	 m=15.0,
- 	vx=-1 * rnd(0.2),
-	 vy=-1 * rnd(1.0)+0.2,
-	 f=0,
-	 ix=0,
-	 iy=0,
-	 offscreen=false,
-	 history={},
-	 crashed=false,
-	 sprite_main=4,
-	 sprite_offscreen=20,
-	 sprite_trail=36,
-	 spr_range_x=1,
-	 spr_range_y=1
+  --x=rnd(128) * 1.0,
+  --y=rnd(128) * 1.0,
+  x=-64,
+  y=80,
+  m=15.0,
+  --vx=-1 * rnd(0.2),
+  --vy=-1 * rnd(1.0)+0.2,
+  vx=1.2,
+  vy=-0.05,
+  f=0,
+  ix=0,
+  iy=0,
+  offscreen=false,
+  history={},
+  crashed=false,
+  sprite_main=4,
+  sprite_offscreen=20,
+  sprite_trail=36,
+  spr_range_x=1,
+  spr_range_y=1
  }
-	planets["demos"] = demos
+ planets["demos"] = demos
 
  luna = {
   name="luna",
-	 x=rnd(128) * 1.0,
-	 y=rnd(128) * 1.0,
- 	m=15.0,
- 	vx=0,
- 	vy=0,
-	 f=0,
-	 ix=0,
-	 iy=0,
-	 offscreen=false,
-	 history={},
-	 crashed=false,
-	 sprite_main=1,
-	 sprite_offscreen=17,
-	 sprite_trail=33,
-	 spr_range_x=1,
-	 spr_range_y=1
+   --x=rnd(128) * 1.0,
+   --y=rnd(128) * 1.0,
+   x=-64,
+   y=140,
+   m=15.0,
+   vx=0.1,
+   vy=-0.05,
+   f=0,
+   ix=0,
+   iy=0,
+   offscreen=false,
+   history={},
+   crashed=false,
+   sprite_main=1,
+   sprite_offscreen=17,
+   sprite_trail=33,
+   spr_range_x=1,
+   spr_range_y=1
  }
-	planets["luna"] = luna
 
- -- optional object used for
- -- debugging and visualization
- target = {
-	 x=rnd(57)+70,
-	 y=rnd(57)+70
- }
+ planets["luna"] = luna
 	
 	-- premake the double planets
 	big_planets = {}
@@ -223,15 +273,6 @@ function _init()
 	exp_spr_offset = 23
 	exp_decay_rate = 5
 	
-	-- now some stars
-	n_stars = 15
-	star_spr_offset = 5
-	star_spr_max = 11
-	star_decay_rate = 15
-	stars = {}
-	--for i=n_stars,1,-1 do
-	-- add(stars, generate_star())
-	--end
 
  --average positions
  first_avg = t
@@ -239,10 +280,20 @@ function _init()
 	sy = 0.0
 	delta_sx = 0.0
 	delta_sy = 0.0
-	get_avg_change()
-	
-end
+	get_avg_change()	
 
+
+ -- now some stars
+ n_stars = 15
+ star_spr_offset = 5
+ star_spr_max = 11
+ star_decay_rate = 15
+ stars = {}
+ for i=n_stars,1,-1 do
+  add(stars, generate_star())
+ end
+
+end
 -->8
 --move
 
@@ -366,35 +417,64 @@ end
 --draw
 
 function _draw()
-	cls()
-	camera(sx-64,sy-64)
+ cls()
+ camera(sx-64,sy-64)
 
-	for i=#stars,1,-1 do
-	 draw_star(stars[i])
-	 --move stars
+ for i=#stars,1,-1 do
+  draw_star(stars[i])
+  --move stars
   stars[i].x += delta_sx
   stars[i].y += delta_sy
-	end
+ end
 
-	for name, p in pairs(planets) do
-	 draw_trail(p)
-	end
-	
-	print(title, 30, 60)
-	print('press x/❎ to reset')
-	local at = alter_title
-	print('press z/🅾️ to '..at)
-	print('seed: '..tostring(seed), sx-63, sy+59)
-	print('seed: '..tostring(seed), sx-63, sy+59)
-	--print(debugstring)
-	if alter_stmt_needed then
-	 print(alter_statement, sx-63, sy-63)
-	end
-	
-	for name, p in pairs(planets) do
-	 draw_planet(p)
-	end
+ if dreaming then
+ --trail of crashed planets
+  for trail in all(trails) do
+   draw_trail(trail)
+   if #trail.history > trail_length then
+    deli(p.history, 1)
+   end
+  end
+ end
 
+ if dreaming then
+  --trail of live planets
+  for name, p in pairs(planets) do
+   draw_trail(p)
+  end
+ end
+
+
+ if dreaming then
+  --lines	
+  wl = window_lines
+  for wl_i=#wl,1,-1 do
+   line(
+    wl[wl_i][1]+sx-64,
+    wl[wl_i][2]+sy-64,
+    wl[wl_i][3]+sx-64,
+    wl[wl_i][4]+sy-64
+    )
+  end
+ end
+
+ --title screen
+ print(title, 30, 60)
+ print('press x/❎ to reset')
+ local at = alter_title
+ print('press z/🅾️ to '..at)
+ --print('seed: '..tostring(seed), sx-63, sy+59)
+ --print(debugstring)
+ if alter_stmt_needed then
+  print(alter_statement, sx-63, sy-63)
+ end
+
+ --planets	
+ for name, p in pairs(planets) do
+  draw_planet(p)
+ end
+
+ --explosions
  for i,exp in ipairs(explosions) do
   if exp.t > 7 then
    deli(explosions, i)
@@ -402,12 +482,8 @@ function _draw()
    draw_explosion(exp)
   end
  end
- for trail in all(trails) do
-  draw_trail(trail)
-  if #trail.history > trail_length then
-   deli(p.history, 1)
-  end
- end
+
+--end draw()
 end
 
 function draw_planet(p)
@@ -425,13 +501,6 @@ function draw_trail(p)
 	 p.history[i]["x"], 
 	 p.history[i]["y"])
 	end
-end
-
-function draw_target(x,y)
-	circfill(x,y,4,8)
-	circfill(x,y,3,7)
-	circfill(x,y,2,8)
-	circfill(x,y,1,7)
 end
 
 function draw_explosion(e)
@@ -509,7 +578,7 @@ function _update60()
   if alter_effect_decay<0 then
    local aer=alter_effect_rate
    alter_effect_decay=aer
-   alter_stars()
+   alter_dream()
    alter_pressed = false
   end
   alter_stmt_needed=true
@@ -541,7 +610,11 @@ function _update60()
 	 --018--inc_min_force()
 	 --019--rad_o_g = inc_rad_o_g(rad_o_g)
 	 --020--alter_stars
+  --021--alter_dream
 	 alter_pressed = true
+  alter_stmt_needed = true
+ else
+  alter_pressed = false
 	end 
 	
 	if btn(5) then
@@ -671,7 +744,7 @@ end
 function generate_star()
  local star = {}
  star["sprite"]=(rnd(star_spr_max-star_spr_offset)+star_spr_offset)
- star["x"]=sx - (rnd(64) * rand_sign())
+ star["x"]=sx - (rnd(64) * rand_sign()) - 5
 	star["y"]=sy - (rnd(64) * rand_sign())
 	star["twinkle_rate"]=star_decay_rate
  return(star)
@@ -693,38 +766,50 @@ function rand_sign()
  end
  return(factor)
 end
--->8
--- seed
 
-seed = flr(rnd(-1)) + 1
-reserved_seeds = {1, 100}
-while seed >= reserved_seeds[1] and seed <=reserved_seeds[2] do
- seed = flr(rnd(-1)) + 1
+function add_line(a,b)
+ local x1 = a[1]
+ local x2 = b[1]
+ local y1 = a[2]
+ local y2 = b[2]
+ add(
+   window_lines, {x1,y1,x2,y2}
+ )
 end
+
+function ofst(a, x, y)
+ --offset a point
+ local b={a[1]+x, a[2]+y}
+ return(b)
+end
+
+-->8
+--seed
+
+--seed = flr(rnd(-1)) + 1
+--reserved_seeds = {1, 100}
+--while seed >= reserved_seeds[1] and seed <=reserved_seeds[2] do
+-- seed = flr(rnd(-1)) + 1
+--end
 --seeds={52,58,66,70,71,74,79,
 --       80,90,92,96,100,107,
 --       110,
 --      }
 --i = flr(rnd(#seeds) + 1)
 --seed = seeds[i]
-srand(seed)
---srand(-17784)
-
-good_seeds = {
- -17784,
- 11020,
- 10473,
- -20105,
- 2340,
- 25336
-}
+--srand(seed)
+srand(-30389)
+seed = "null"
+--good_seeds = {
+-- -17784,
+-- 11020,
+-- 10473,
+-- -20105,
+-- 2340,
+-- 25336
+--}
 -->8
--- alter
-
-alter_statement = ""
-alter_stmt_rate = 240
-alter_effect_rate = 5
-alter_pressed = false
+--alter
 
 --018
 function inc_min_force()
@@ -756,6 +841,19 @@ function alter_stars()
  text="number of stars = "
  alter_statement = text..tostring(#stars)
 end
+
+--021
+dreaming = true
+function alter_dream()
+ dreaming = not dreaming
+ if dreaming then
+  alter_statement = "dream"
+ else
+  alter_statement = "awake"
+ end
+end
+
+
 __gfx__
 000000000666d600000ffff088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000006666d6660fff99ff80088008332223330000000000000000000000000000000000000000000700000000000000000000000000000000000000000000
