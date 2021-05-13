@@ -30,8 +30,13 @@ function _init()
  
  
  --physics
- collision_distance = 4
- rad_o_g = 2
+ collision_distance = 4.0
+ rad_o_g = 1.8
+ --speed and force limits
+	min_speed = -100.0
+	max_speed = 100.0
+	min_force = 0.003
+	max_force = 1000.0
 
  --reset timer
  reset_timer=8
@@ -49,19 +54,13 @@ function _init()
 	
 	--keep planets in here
 	planets = {}
-	
-	--speed and force limits
-	min_speed = -10
-	max_speed = 10
-	min_force = 0.005
-	max_force = 100
  
  --define planets here
  phobos = {
   name="phobos",
- 	x=rnd(128),
- 	y=rnd(128),
- 	m=15,
+ 	x=rnd(128) * 1.0,
+ 	y=rnd(128) * 1.0,
+ 	m=15.0,
  	vx=rnd(0.2),
 	 vy=rnd(1.0)+0.2,
 	 f=0,
@@ -80,9 +79,9 @@ function _init()
 	
  demos = {
   name="demos",
-	 x=rnd(128),
-	 y=rnd(128),
-	 m=15,
+	 x=rnd(128) * 1.0,
+	 y=rnd(128) * 1.0,
+	 m=15.0,
  	vx=-1 * rnd(0.2),
 	 vy=-1 * rnd(1.0)+0.2,
 	 f=0,
@@ -101,9 +100,9 @@ function _init()
 
  luna = {
   name="luna",
-	 x=rnd(128),
-	 y=rnd(128),
- 	m=15,
+	 x=rnd(128) * 1.0,
+	 y=rnd(128) * 1.0,
+ 	m=15.0,
  	vx=0,
  	vy=0,
 	 f=0,
@@ -131,9 +130,9 @@ function _init()
 	big_planets = {}
 	phobosdemos = {
 	 name="phobosdemos",
- 	x=0,
- 	y=0,
- 	m=28,
+ 	x=0.0,
+ 	y=0.0,
+ 	m=28.0,
  	vx=0,
 	 vy=0,
 	 f=0,
@@ -153,9 +152,9 @@ function _init()
 	
 	phobosluna = {
 	 name="phobosluna",
- 	x=0,
- 	y=0,
- 	m=28,
+ 	x=0.0,
+ 	y=0.0,
+ 	m=28.0,
  	vx=0,
 	 vy=0,
 	 f=0,
@@ -174,9 +173,9 @@ function _init()
 
 	demosluna = {
 	 name="demosluna",
- 	x=0,
- 	y=0,
- 	m=28,
+ 	x=0.0,
+ 	y=0.0,
+ 	m=28.0,
  	vx=0,
 	 vy=0,
 	 f=0,
@@ -201,9 +200,9 @@ function _init()
 	
 	behemoth = {
 	 name="behemoth",
- 	x=0,
- 	y=0,
- 	m=55,
+ 	x=0.0,
+ 	y=0.0,
+ 	m=55.0,
  	vx=0,
 	 vy=0,
 	 f=0,
@@ -328,7 +327,10 @@ function move_planet(p)
  		 break
  		end
  		--get angle of force vec
- 		angle = atan2(p.x-p2.x,p.y-p2.y)
+ 		--angle = atan2(p.x-p2.x,p.y-p2.y)
+ 		xdist = (p2.x-p.x)/dist * -1
+ 		ydist = (p2.y-p.y)/dist * -1
+ 		
  		--compute force of g per p
  		force = ((p.m * p2.m * (6.67*10^-3)) / dist^rad_o_g)
   	force = min(force, max_force)
@@ -336,8 +338,10 @@ function move_planet(p)
  		--record of ath force
  		p.f = max(force, p.f)
  		--get componants of force
- 		p.vx=p.vx-force*cos(angle)
- 		p.vy=p.vy-force*sin(angle)
+ 		p.vx=p.vx-force * xdist
+ 		--p.vx=p.vx-force * cos(angle)
+ 		p.vy=p.vy-force * ydist
+ 		--p.vy=p.vy-force * sin(angle)
  	end
  end
  	
@@ -348,7 +352,11 @@ function move_planet(p)
  p.vy = min(p.vy, max_speed)
  
  --actually move
- p.x+=p.vx 
+ --show flowers
+ --p.x+=p.vx -sx+64
+ --p.y+=p.vy -sy+64
+ --show what einstein was talking about
+ p.x+=p.vx
  p.y+=p.vy
 
 end
