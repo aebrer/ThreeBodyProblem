@@ -68,7 +68,7 @@ function _init()
  alter_pressed = false
 
  --title
- alter_title = "special"
+ alter_title = "2body"
  alter_num = "000"
  title = "tbp_"..alter_num
  title = title.."_"
