@@ -15,47 +15,46 @@ function _init()
  --camera
  --camera(-64,-64)
  
- debug_string = ""
  f=false
  t=true
  
  --window stuff
  window_line_counter=1
  window_lines = {}
- n_hori_lines = 8
- n_vert_lines = 8
+ -- n_hori_lines = 8
+ -- n_vert_lines = 8
  
- -- need to declare some fixed
- -- points first, will make this
- -- a lot easier
+ -- -- need to declare some fixed
+ -- -- points first, will make this
+ -- -- a lot easier
  
- --outer box
- local a={8,8}
- local b={120,8}
- local c={8, 120}
- local d={120,120}
+ -- --outer box
+ -- local a={8,8}
+ -- local b={120,8}
+ -- local c={8, 120}
+ -- local d={120,120}
 
- --inner box
- local e={24,24}
- local f={104,24}
- local g={24,104}
- local h={104,104}
+ -- --inner box
+ -- local e={24,24}
+ -- local f={104,24}
+ -- local g={24,104}
+ -- local h={104,104}
  
- --outer box
- add_line(a,b)
- add_line(b,d)
- add_line(d,c)
- add_line(c,a)
+ -- --outer box
+ -- add_line(a,b)
+ -- add_line(b,d)
+ -- add_line(d,c)
+ -- add_line(c,a)
  
- --inner box
- add_line(e,f)
- add_line(f,h)
- add_line(h,g)
- add_line(g,e)
+ -- --inner box
+ -- add_line(e,f)
+ -- add_line(f,h)
+ -- add_line(h,g)
+ -- add_line(g,e)
  
- --diagonals
- add_line(ofst(a, 16, 0), ofst(d, -16, 0))
- add_line(ofst(e, -20, 24), ofst(h, 20, -24))
+ -- --diagonals
+ -- add_line(ofst(a, 16, 0), ofst(d, -16, 0))
+ -- add_line(ofst(e, -20, 24), ofst(h, 20, -24))
 
 
  --alter
@@ -68,16 +67,25 @@ function _init()
  alter_pressed = false
 
  --title
- alter_title = "awake/dream"
- alter_num = "021"
+ alter_title = "color"
+ alter_num = "022"
  title = "tbp_"..alter_num
  title = title.."_"
  title = title..alter_title
+ title_needed = true
+ title_decay = 600
  
- 
+ --colors 
+ cols = {
+  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+  123,129,130,131,132,133,134,135,136,
+  137,138,139,140,141,142,143
+ }
+ alter_colors()
+
  --physics
- collision_distance = 4.0
- rad_o_g = 1.8
+ collision_distance = 1.99
+ rad_o_g = 1.6
  --speed and force limits
 	min_speed = -100.0
 	max_speed = 100.0
@@ -95,7 +103,7 @@ function _init()
  --trail parameters
  snapshot_rate=4
  snapshot_timer=snapshot_rate
- trail_length=275
+ trail_length=80
  trails = {} --the dead trails
 	
 	--keep planets in here
@@ -104,15 +112,17 @@ function _init()
  --define planets here
  phobos = {
   name="phobos",
-    --x=rnd(128) * 1.0,
-    --y=rnd(128) * 1.0,
-    x=-64,
-    y=30,
+    x=rnd(128) * 1.0,
+    y=rnd(128) * 1.0,
+    --x=-64,
+    --y=30,
+    old_x=0.0,
+    old_y=0.0,
     m=15.0,
-    --vx=rnd(0.2),
-    --vy=rnd(1.0)+0.2,
-    vx=0.2,
-    vy=0.1,
+    vx=rnd(0.2),
+    vy=rnd(1.0)+0.2,
+    --vx=0.2,
+    --vy=0.1,
     f=0,
     ix=0,
     iy=0,
@@ -129,15 +139,17 @@ function _init()
 	
  demos = {
   name="demos",
-  --x=rnd(128) * 1.0,
-  --y=rnd(128) * 1.0,
-  x=-64,
-  y=80,
+  x=rnd(128) * 1.0,
+  y=rnd(128) * 1.0,
+  --x=-64,
+  --y=80,
+  old_x=0.0,
+  old_y=0.0,
   m=15.0,
-  --vx=-1 * rnd(0.2),
-  --vy=-1 * rnd(1.0)+0.2,
-  vx=1.2,
-  vy=-0.05,
+  vx=-1 * rnd(0.2),
+  vy=-1 * rnd(1.0)+0.2,
+  --vx=1.2,
+  --vy=-0.05,
   f=0,
   ix=0,
   iy=0,
@@ -154,10 +166,12 @@ function _init()
 
  luna = {
   name="luna",
-   --x=rnd(128) * 1.0,
-   --y=rnd(128) * 1.0,
-   x=-64,
-   y=140,
+   x=rnd(128) * 1.0,
+   y=rnd(128) * 1.0,
+   --x=-64,
+   --y=140,
+   old_x=0.0,
+   old_y=0.0,
    m=15.0,
    vx=0.1,
    vy=-0.05,
@@ -182,6 +196,8 @@ function _init()
 	 name="phobosdemos",
  	x=0.0,
  	y=0.0,
+  old_x=0.0,
+  old_y=0.0,
  	m=28.0,
  	vx=0,
 	 vy=0,
@@ -204,6 +220,8 @@ function _init()
 	 name="phobosluna",
  	x=0.0,
  	y=0.0,
+  old_x=0.0,
+  old_y=0.0,
  	m=28.0,
  	vx=0,
 	 vy=0,
@@ -225,6 +243,8 @@ function _init()
 	 name="demosluna",
  	x=0.0,
  	y=0.0,
+  old_x=0.0,
+  old_y=0.0,
  	m=28.0,
  	vx=0,
 	 vy=0,
@@ -251,7 +271,9 @@ function _init()
 	behemoth = {
 	 name="behemoth",
  	x=0.0,
- 	y=0.0,
+  y=0.0,
+  old_x=0.0,
+  old_y=0.0,
  	m=55.0,
  	vx=0,
 	 vy=0,
@@ -284,7 +306,7 @@ function _init()
 
 
  -- now some stars
- n_stars = 15
+ n_stars = 7
  star_spr_offset = 5
  star_spr_max = 11
  star_decay_rate = 15
@@ -306,7 +328,7 @@ function move_planet(p)
  	
  	if not(p2==p) and not p.crashed then
  		--calculate distance
- 		dist=approx_dist(p2.x-p.x,p2.y-p.y)
+ 		dist=approx_dist(p2.old_x-p.old_x,p2.old_y-p.old_y)
  		-- calc crash here
  		if dist < collision_distance then
  		 p.crashed = true
@@ -328,8 +350,8 @@ function move_planet(p)
  		 
  		 --get avg speed+pos of 
  		 --two crashed planets
- 		 local avgx = (p.x + p2.x) / 2
- 		 local avgy = (p.y + p2.y) / 2
+ 		 local avgx = (p.old_x + p2.old_x) / 2
+ 		 local avgy = (p.old_y + p2.old_y) / 2
  		 local avgvx = (p.vx + p2.vx) / 2
  		 local avgvy = (p.vy + p2.vy) / 2
  		 
@@ -377,10 +399,13 @@ function move_planet(p)
 				add(trails, get_trail(p2))
  		 break
  		end
+
+   -- planets are not crashed, keep moving
+
  		--get angle of force vec
  		--angle = atan2(p.x-p2.x,p.y-p2.y)
- 		xdist = (p2.x-p.x)/dist * -1
- 		ydist = (p2.y-p.y)/dist * -1
+ 		xdist = (p2.old_x-p.old_x)/dist * -1
+ 		ydist = (p2.old_y-p.old_y)/dist * -1
  		
  		--compute force of g per p
  		force = ((p.m * p2.m * (6.67*10^-3)) / dist^rad_o_g)
@@ -404,11 +429,11 @@ function move_planet(p)
  
  --actually move
  --show flowers
- --p.x+=p.vx -sx+64
- --p.y+=p.vy -sy+64
+ p.x += p.vx -sx+64
+ p.y += p.vy -sy+64
  --show what einstein was talking about
- p.x+=p.vx
- p.y+=p.vy
+ --p.x += p.vx
+ --p.y += p.vy
 
 end
 
@@ -427,46 +452,47 @@ function _draw()
   stars[i].y += delta_sy
  end
 
- if dreaming then
+ --if dreaming then
  --trail of crashed planets
-  for trail in all(trails) do
-   draw_trail(trail)
-   if #trail.history > trail_length then
-    deli(p.history, 1)
-   end
-  end
+ for trail in all(trails) do
+  draw_trail(trail)
+  deli(trail.history, 1)
  end
+ --end
 
- if dreaming then
+ --if dreaming then
   --trail of live planets
-  for name, p in pairs(planets) do
-   draw_trail(p)
-  end
+ for name, p in pairs(planets) do
+  draw_trail(p)
  end
+ --end
 
 
- if dreaming then
+ --if dreaming then
   --lines	
-  wl = window_lines
-  for wl_i=#wl,1,-1 do
-   line(
-    wl[wl_i][1]+sx-64,
-    wl[wl_i][2]+sy-64,
-    wl[wl_i][3]+sx-64,
-    wl[wl_i][4]+sy-64
-    )
-  end
+ wl = window_lines
+ for wl_i=#wl,1,-1 do
+  line(
+   wl[wl_i][1]+sx-64,
+   wl[wl_i][2]+sy-64,
+   wl[wl_i][3]+sx-64,
+   wl[wl_i][4]+sy-64
+   )
  end
+ --end
 
  --title screen
- print(title, 30, 60)
- print('press x/❎ to reset')
- local at = alter_title
- print('press z/🅾️ to '..at)
- --print('seed: '..tostring(seed), sx-63, sy+59)
- --print(debugstring)
+ if title_needed then
+  print(title, sx-63, sy-63)
+  print('press x/❎ to reset', sx-63, sy-56)
+  local at = alter_title
+  print('press z/🅾️ to '..at, sx-63, sy-49)
+  print('seed: '..tostring(seed), sx-63, sy+59)
+ end
+
  if alter_stmt_needed then
   print(alter_statement, sx-63, sy-63)
+  print('seed: '..tostring(seed), sx-63, sy+59)
  end
 
  --planets	
@@ -534,7 +560,13 @@ end
 --update
 
 function _update60()
-	
+
+ --title
+ title_decay -= 1
+ if title_decay < 0 then
+  title_needed = false
+ end
+
 	--used for periodic cls
 	--only needed if main cls
 	--is commented out
@@ -557,6 +589,11 @@ function _update60()
 	--ie. do this first
 	get_avg_change()	
 	
+ for name, p in pairs(planets) do
+  p.old_x = p.x
+  p.old_y = p.y
+ end
+
 	--actually move the planets
 	for name, p in pairs(planets) do
 	 move_planet(p)
@@ -578,7 +615,7 @@ function _update60()
   if alter_effect_decay<0 then
    local aer=alter_effect_rate
    alter_effect_decay=aer
-   alter_dream()
+   alter_colors()
    alter_pressed = false
   end
   alter_stmt_needed=true
@@ -611,6 +648,7 @@ function _update60()
 	 --019--rad_o_g = inc_rad_o_g(rad_o_g)
 	 --020--alter_stars
   --021--alter_dream
+  --022--alter_colors
 	 alter_pressed = true
   alter_stmt_needed = true
  else
@@ -783,31 +821,22 @@ function ofst(a, x, y)
  return(b)
 end
 
+function get_rand_color()
+ local col_i = flr(rnd(#cols)) + 1
+ --printh(col_i, "colors_debug.txt", true)
+ local col = cols[col_i]
+ --printh(col, "colors_debug.txt", true)
+ return(col)
+end
+
 -->8
 --seed
 
---seed = flr(rnd(-1)) + 1
---reserved_seeds = {1, 100}
---while seed >= reserved_seeds[1] and seed <=reserved_seeds[2] do
--- seed = flr(rnd(-1)) + 1
---end
---seeds={52,58,66,70,71,74,79,
---       80,90,92,96,100,107,
---       110,
---      }
---i = flr(rnd(#seeds) + 1)
---seed = seeds[i]
---srand(seed)
-srand(-30389)
-seed = "null"
---good_seeds = {
--- -17784,
--- 11020,
--- 10473,
--- -20105,
--- 2340,
--- 25336
---}
+seed = flr(rnd(-1)) + 1
+-- don't need to reseve seeds anymore
+-- due to physics engine being different
+srand(seed)
+
 -->8
 --alter
 
@@ -850,6 +879,15 @@ function alter_dream()
   alter_statement = "dream"
  else
   alter_statement = "awake"
+ end
+end
+
+--022
+function alter_colors()
+ for i=15,0,-1 do
+  local col = get_rand_color()
+  --printh(i.." "..col, "colors_debug.txt", true)
+  pal(i, col, 1)
  end
 end
 
