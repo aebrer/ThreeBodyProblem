@@ -18,6 +18,7 @@ function _init()
  f=false
  t=true
  
+
  --window stuff
  window_line_counter=1
  window_lines = {}
@@ -67,29 +68,32 @@ function _init()
  alter_pressed = false
 
  --title
- alter_title = "color"
- alter_num = "022"
+ alter_title = "special"
+ alter_num = "000"
  title = "tbp_"..alter_num
  title = title.."_"
  title = title..alter_title
  title_needed = true
  title_decay = 600
  
- --colors 
+ --display 
  cols = {
   0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
   123,129,130,131,132,133,134,135,136,
   137,138,139,140,141,142,143
  }
  alter_colors()
+ gods_eye_view = false
+ alter_clear = false
+
 
  --physics
  collision_distance = 1.99
- rad_o_g = 1.6
+ rad_o_g = 1.4
  --speed and force limits
 	min_speed = -100.0
 	max_speed = 100.0
-	min_force = 0.003
+	min_force = 0.01
 	max_force = 1000.0
 
  --reset timer
@@ -97,7 +101,7 @@ function _init()
  reset_needed=false
 
  --use for periiodic cls
- blank_timer_max=600
+ blank_timer_max=120
  blank_timer=blank_timer_max
 
  --trail parameters
@@ -135,7 +139,7 @@ function _init()
     spr_range_x=1,
     spr_range_y=1
  }
- planets["phobos"] = phobos
+ -- planets["phobos"] = phobos
 	
  demos = {
   name="demos",
@@ -146,8 +150,8 @@ function _init()
   old_x=0.0,
   old_y=0.0,
   m=15.0,
-  vx=-1 * rnd(0.2),
-  vy=-1 * rnd(1.0)+0.2,
+  vx=rnd(0.2) * rand_sign(),
+  vy=rnd(0.1)+0.1 * rand_sign(),
   --vx=1.2,
   --vy=-0.05,
   f=0,
@@ -162,19 +166,19 @@ function _init()
   spr_range_x=1,
   spr_range_y=1
  }
- planets["demos"] = demos
+ -- planets["demos"] = demos
 
  luna = {
   name="luna",
-   x=rnd(128) * 1.0,
-   y=rnd(128) * 1.0,
+   x=rnd(64),
+   y=rnd(64) * rand_sign(),
    --x=-64,
    --y=140,
    old_x=0.0,
    old_y=0.0,
    m=15.0,
-   vx=0.1,
-   vy=-0.05,
+   vx=rnd(1.2),
+   vy=rnd(0.2)+0.2,
    f=0,
    ix=0,
    iy=0,
@@ -187,20 +191,19 @@ function _init()
    spr_range_x=1,
    spr_range_y=1
  }
-
  planets["luna"] = luna
 	
 	-- premake the double planets
 	big_planets = {}
 	phobosdemos = {
 	 name="phobosdemos",
- 	x=0.0,
- 	y=0.0,
+ 	x=rnd(64) + 64,
+  y=luna.y * rand_sign() + 30 * rand_sign(),
   old_x=0.0,
   old_y=0.0,
  	m=28.0,
- 	vx=0,
-	 vy=0,
+  vx=rnd(0.2) * rand_sign(),
+  vy=rnd(1.1)+0.1 * rand_sign(),
 	 f=0,
 	 ix=0,
 	 iy=0,
@@ -214,12 +217,13 @@ function _init()
 	 spr_range_y=2
 	}
 	
+ planets["phobosdemos"] = phobosdemos
 	big_planets["phobosdemos"] = phobosdemos
 	
 	phobosluna = {
 	 name="phobosluna",
- 	x=0.0,
- 	y=0.0,
+ 	x=rnd(128) * 1.0,
+  y=rnd(128) * 1.0,
   old_x=0.0,
   old_y=0.0,
  	m=28.0,
@@ -238,11 +242,12 @@ function _init()
 	 spr_range_y=2
 	}
 	big_planets["phobosluna"] = phobosluna
+ -- planets["phobosluna"] = phobosluna
 
 	demosluna = {
 	 name="demosluna",
- 	x=0.0,
- 	y=0.0,
+ 	x=rnd(128) * 1.0,
+  y=rnd(128) * 1.0,
   old_x=0.0,
   old_y=0.0,
  	m=28.0,
@@ -261,6 +266,7 @@ function _init()
 	 spr_range_y=2
 	}
 	big_planets["demosluna"] = demosluna
+ -- planets["demosluna"] = demosluna
 	
 	double_planet_names = {
 	 "demosluna",
@@ -306,7 +312,7 @@ function _init()
 
 
  -- now some stars
- n_stars = 7
+ n_stars = 0
  star_spr_offset = 5
  star_spr_max = 11
  star_decay_rate = 15
@@ -429,11 +435,11 @@ function move_planet(p)
  
  --actually move
  --show flowers
- p.x += p.vx -sx+64
- p.y += p.vy -sy+64
+ --p.x += p.vx -sx+64
+ --p.y += p.vy -sy+64
  --show what einstein was talking about
- --p.x += p.vx
- --p.y += p.vy
+ p.x += p.vx
+ p.y += p.vy
 
 end
 
@@ -442,7 +448,11 @@ end
 --draw
 
 function _draw()
- cls()
+ 
+ --display
+ if alter_clear then
+  cls()
+ end
  camera(sx-64,sy-64)
 
  for i=#stars,1,-1 do
@@ -481,19 +491,19 @@ function _draw()
  end
  --end
 
- --title screen
- if title_needed then
-  print(title, sx-63, sy-63)
-  print('press x/❎ to reset', sx-63, sy-56)
-  local at = alter_title
-  print('press z/🅾️ to '..at, sx-63, sy-49)
-  print('seed: '..tostring(seed), sx-63, sy+59)
- end
+ -- --title screen
+ -- if title_needed then
+ --  print(title, sx-63, sy-63)
+ --  print('press x/❎ to reset', sx-63, sy-56)
+ --  local at = alter_title
+ --  print('press z/🅾️ to '..at, sx-63, sy-49)
+ --  print('seed: '..tostring(seed), sx-63, sy+59)
+ -- end
 
- if alter_stmt_needed then
-  print(alter_statement, sx-63, sy-63)
-  print('seed: '..tostring(seed), sx-63, sy+59)
- end
+ -- if alter_stmt_needed then
+ --  print(alter_statement, sx-63, sy-63)
+ --  print('seed: '..tostring(seed), sx-63, sy+59)
+ -- end
 
  --planets	
  for name, p in pairs(planets) do
@@ -561,6 +571,14 @@ end
 
 function _update60()
 
+ --relative motion fix
+ if not gods_eye_view then
+  for name, p in pairs(planets) do
+   p.x -= sx+64
+   p.y -= sy+64
+  end
+ end
+
  --title
  title_decay -= 1
  if title_decay < 0 then
@@ -573,7 +591,8 @@ function _update60()
 	blank_timer-=1
 	if blank_timer<0 then 
 		blank_timer=blank_timer_max 
-		cls()
+		alter_colors()
+  --cls()
 	end
 
  --trail timing
@@ -615,8 +634,8 @@ function _update60()
   if alter_effect_decay<0 then
    local aer=alter_effect_rate
    alter_effect_decay=aer
-   alter_colors()
    alter_pressed = false
+   alter_cls()
   end
   alter_stmt_needed=true
 	end
@@ -889,6 +908,11 @@ function alter_colors()
   --printh(i.." "..col, "colors_debug.txt", true)
   pal(i, col, 1)
  end
+end
+
+--000
+function alter_cls()
+ alter_clear = not alter_clear
 end
 
 
