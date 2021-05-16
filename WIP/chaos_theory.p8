@@ -85,6 +85,7 @@ function _init()
  alter_colors()
  gods_eye_view = false
  alter_clear = false
+ mono_palette = 1
 
 
  --physics
@@ -107,7 +108,7 @@ function _init()
  --trail parameters
  snapshot_rate=4
  snapshot_timer=snapshot_rate
- trail_length=80
+ trail_length=250
  trails = {} --the dead trails
 	
 	--keep planets in here
@@ -906,7 +907,7 @@ function alter_colors()
  for i=15,0,-1 do
   local col = get_rand_color()
   --printh(i.." "..col, "colors_debug.txt", true)
-  pal(i, col, 1)
+  pal(i, col, mono_palette)
  end
 end
 
