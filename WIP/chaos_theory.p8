@@ -70,7 +70,7 @@ function _init()
 
  --title
  alter_title = "frame"
- alter_num = "023a"
+ alter_num = "023b"
  title = "tbp_"..alter_num
  title = title.."_"
  title = title..alter_title
@@ -91,7 +91,7 @@ function _init()
  }
  -- alter_colors()
  gods_eye_view = true
- alter_clear = true
+ alter_clear = false
  mono_palette = 1
  cam_smooth_factor = 60
  cam_xy = {0,0}
