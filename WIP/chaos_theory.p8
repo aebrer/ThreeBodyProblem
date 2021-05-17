@@ -18,6 +18,7 @@ function _init()
  f=false
  t=true
  
+ happens_once_done = false
 
  --window stuff
  window_line_counter=1
@@ -68,8 +69,8 @@ function _init()
  alter_pressed = false
 
  --title
- alter_title = "2body"
- alter_num = "000"
+ alter_title = "frame"
+ alter_num = "023a"
  title = "tbp_"..alter_num
  title = title.."_"
  title = title..alter_title
@@ -77,24 +78,32 @@ function _init()
  title_decay = 600
  
  --display 
+ -- -- all cols
+ -- cols = {
+ --  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+ --  128,129,130,131,132,133,134,135,136,
+ --  137,138,139,140,141,142,143
+ -- }
  cols = {
   0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
-  123,129,130,131,132,133,134,135,136,
+  129,130,131,134,135,136,
   137,138,139,140,141,142,143
  }
- alter_colors()
- gods_eye_view = false
- alter_clear = false
+ -- alter_colors()
+ gods_eye_view = true
+ alter_clear = true
  mono_palette = 1
+ cam_smooth_factor = 60
+ cam_xy = {0,0}
 
 
  --physics
  collision_distance = 1.99
- rad_o_g = 1.4
+ rad_o_g = 1.8
  --speed and force limits
 	min_speed = -100.0
 	max_speed = 100.0
-	min_force = 0.01
+	min_force = 0.005
 	max_force = 1000.0
 
  --reset timer
@@ -106,13 +115,18 @@ function _init()
  blank_timer=blank_timer_max
 
  --trail parameters
- snapshot_rate=4
+ snapshot_rate=2
  snapshot_timer=snapshot_rate
- trail_length=250
+ trail_length=300
  trails = {} --the dead trails
 	
 	--keep planets in here
 	planets = {}
+
+ --for aligning the planets
+ local x_sign = rand_sign()
+ local y_sign = rand_sign()
+
  
  --define planets here
  phobos = {
@@ -124,8 +138,8 @@ function _init()
     old_x=0.0,
     old_y=0.0,
     m=15.0,
-    vx=rnd(0.2),
-    vy=rnd(1.0)+0.2,
+    vx=rnd(0.2) * x_sign,
+    vy=rnd(1.0)+0.2 * y_sign,
     --vx=0.2,
     --vy=0.1,
     f=0,
@@ -140,7 +154,7 @@ function _init()
     spr_range_x=1,
     spr_range_y=1
  }
- -- planets["phobos"] = phobos
+ planets["phobos"] = phobos
 	
  demos = {
   name="demos",
@@ -151,8 +165,8 @@ function _init()
   old_x=0.0,
   old_y=0.0,
   m=15.0,
-  vx=rnd(0.2) * rand_sign(),
-  vy=rnd(0.1)+0.1 * rand_sign(),
+  vx=rnd(0.2) * x_sign,
+  vy=rnd(0.1)+0.1 * y_sign,
   --vx=1.2,
   --vy=-0.05,
   f=0,
@@ -167,7 +181,7 @@ function _init()
   spr_range_x=1,
   spr_range_y=1
  }
- -- planets["demos"] = demos
+ planets["demos"] = demos
 
  luna = {
   name="luna",
@@ -178,8 +192,8 @@ function _init()
    old_x=0.0,
    old_y=0.0,
    m=15.0,
-   vx=rnd(1.2),
-   vy=rnd(0.2)+0.2,
+   vx=rnd(1.2) * x_sign,
+   vy=rnd(0.2)+0.2 * y_sign,
    f=0,
    ix=0,
    iy=0,
@@ -218,7 +232,7 @@ function _init()
 	 spr_range_y=2
 	}
 	
- planets["phobosdemos"] = phobosdemos
+ -- planets["phobosdemos"] = phobosdemos
 	big_planets["phobosdemos"] = phobosdemos
 	
 	phobosluna = {
@@ -454,7 +468,7 @@ function _draw()
  if alter_clear then
   cls()
  end
- camera(sx-64,sy-64)
+ camera(cam_xy[1]-64,cam_xy[2]-64)
 
  for i=#stars,1,-1 do
   draw_star(stars[i])
@@ -492,19 +506,19 @@ function _draw()
  end
  --end
 
- -- --title screen
- -- if title_needed then
- --  print(title, sx-63, sy-63)
- --  print('press x/❎ to reset', sx-63, sy-56)
- --  local at = alter_title
- --  print('press z/🅾️ to '..at, sx-63, sy-49)
- --  print('seed: '..tostring(seed), sx-63, sy+59)
- -- end
+ --title screen
+ if title_needed then
+  print(title, sx-63, sy-63)
+  print('press x/❎ to reset', sx-63, sy-56)
+  local at = alter_title
+  print('press z/🅾️ to '..at, sx-63, sy-49)
+  print('seed: '..tostring(seed), sx-63, sy+59)
+ end
 
- -- if alter_stmt_needed then
- --  print(alter_statement, sx-63, sy-63)
- --  print('seed: '..tostring(seed), sx-63, sy+59)
- -- end
+ if alter_stmt_needed then
+  print(alter_statement, sx-63, sy-63)
+  print('seed: '..tostring(seed), sx-63, sy+59)
+ end
 
  --planets	
  for name, p in pairs(planets) do
@@ -572,6 +586,11 @@ end
 
 function _update60()
 
+ if not happens_once_done then
+  alter_colors()
+  happens_once_done = true
+ end
+
  --relative motion fix
  if not gods_eye_view then
   for name, p in pairs(planets) do
@@ -592,7 +611,7 @@ function _update60()
 	blank_timer-=1
 	if blank_timer<0 then 
 		blank_timer=blank_timer_max 
-		alter_colors()
+		-- alter_colors()
   --cls()
 	end
 
@@ -636,7 +655,7 @@ function _update60()
    local aer=alter_effect_rate
    alter_effect_decay=aer
    alter_pressed = false
-   alter_cls()
+   alter_frame()
   end
   alter_stmt_needed=true
 	end
@@ -712,13 +731,18 @@ function get_avg_change()
 	end
 	sx = sx / #avg_x
 	sy = sy / #avg_y
-	if first_avg then 
+	
+ if first_avg then 
 	 delta_sx = 0.0
 	 delta_sy = 0.0
 	else
 	 delta_sx = sx-old_sx
 	 delta_sy = sy-old_sy
 	end
+
+ -- lets try making this a moving average
+ cam_xy[1] = sx - (delta_sx / cam_smooth_factor)
+ cam_xy[2] = sy - (delta_sy / cam_smooth_factor)
 	
 	first_avg = false
 	
@@ -914,6 +938,15 @@ end
 --000
 function alter_cls()
  alter_clear = not alter_clear
+end
+
+--023
+function alter_frame()
+ gods_eye_view = not gods_eye_view
+ for name, p in pairs(planets) do
+  p.history = {}
+ end
+ trails = {}
 end
 
 
