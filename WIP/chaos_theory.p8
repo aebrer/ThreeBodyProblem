@@ -15,9 +15,6 @@ function _init()
  --camera
  --camera(-64,-64)
  
- f=false
- t=true
- 
  happens_once_done = false
 
  --window stuff
@@ -69,8 +66,9 @@ function _init()
  alter_pressed = false
 
  --title
- alter_title = "frame"
- alter_num = "023b"
+ side = "b"
+ alter_title = "gltch"
+ alter_num = "024"..side
  title = "tbp_"..alter_num
  title = title.."_"
  title = title..alter_title
@@ -84,13 +82,106 @@ function _init()
  --  128,129,130,131,132,133,134,135,136,
  --  137,138,139,140,141,142,143
  -- }
- cols = {
-  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
-  129,130,131,134,135,136,
-  137,138,139,140,141,142,143
- }
- -- alter_colors()
- gods_eye_view = true
+ -- cols = {
+ --  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+ --  129,130,131,134,135,136,
+ --  137,138,139,140,141,142,143
+ -- }
+ -- --muted colors
+ --  cols = {
+ --  0,1,2,5,7,8,9,10,12,
+ --  128,129,130,132,133,136,
+ --  137,140,141,142,143
+ -- }
+ dither_amt = 1000
+ use_dither = true
+ dither_prob = 0.85
+ dither_rad = 12
+ dither_loops = 6
+ glitch_every_x_sec = 13
+ noise_amt = 1.0
+
+ --colors 
+ cols = {}
+ if side == "a" then
+  --a-side palette
+  local aside_bgs = {0,128,129}
+  local aside_fgs = {139,3,8,136}
+  local aside_bg = aside_bgs[flr(rnd(#aside_bgs)) + 1]
+  local aside_fg = aside_fgs[flr(rnd(#aside_fgs)) + 1]
+  cols["c_background"]   = aside_bg
+  cols["c_luna_trail"]   = aside_fg
+  cols["c_demos_vein"]   = aside_fg
+  cols["c_demos_outer"]  = aside_fg
+  cols["c_phobos_trail"] = aside_fg
+  cols["c_luna_core_1"]  = aside_fg
+  cols["c_luna_outer"]   = aside_fg
+  cols["c_stars"]        = aside_fg
+  cols["c_explosion_1"]  = aside_fg
+  cols["c_phobos_vein"]  = aside_fg
+  cols["c_phobos_core"]  = aside_fg
+  cols["c_demos_trail"]  = aside_fg
+  cols["c_unused"]       = aside_fg
+  cols["c_luna_accent"]  = aside_fg
+  cols["c_text"]         = aside_fg
+  cols["c_phobos_outer"] = aside_fg
+ elseif side == "b" then
+  --b-side palette
+    --a-side palette
+  local bside_bgs = {0,1,128,129, 130}
+  local bside_fgs = {2,3,7,8,10,12,14,136,137,138,139,140,142,143,135}
+  local bside_bg = bside_bgs[flr(rnd(#bside_bgs)) + 1]
+  local bside_fg1 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
+  local bside_fg2 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
+  local bside_fg3 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
+  local bside_fg4 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
+  local bside_text = bside_fgs[flr(rnd(#bside_fgs)) + 1]
+
+
+  cols["c_background"]   = bside_bg
+  cols["c_luna_trail"]   = bside_fg1
+  cols["c_demos_vein"]   = bside_fg1
+  cols["c_demos_outer"]  = bside_fg2
+  cols["c_phobos_trail"] = bside_fg2
+  cols["c_luna_core_1"]  = bside_fg2
+  cols["c_luna_outer"]   = bside_fg3
+  cols["c_stars"]        = bside_fg1
+  cols["c_explosion_1"]  = bside_text
+  cols["c_phobos_vein"]  = bside_fg3
+  cols["c_phobos_core"]  = bside_fg4
+  cols["c_demos_trail"]  = bside_fg3
+  cols["c_unused"]       = bside_text
+  cols["c_luna_accent"]  = bside_fg4
+  cols["c_text"]         = bside_text
+  cols["c_phobos_outer"] = bside_fg1
+ end
+ 
+ og_cols = {}
+ og_cols["c_background"]   = 0
+ og_cols["c_luna_trail"]   = 1
+ og_cols["c_demos_vein"]   = 2
+ og_cols["c_demos_outer"]  = 3
+ og_cols["c_phobos_trail"] = 4
+ og_cols["c_luna_core_1"]  = 5
+ og_cols["c_luna_outer"]   = 6
+ og_cols["c_stars"]        = 7
+ og_cols["c_explosion_1"]  = 8
+ og_cols["c_phobos_vein"]  = 9
+ og_cols["c_phobos_core"]  = 10
+ og_cols["c_demos_trail"]  = 11
+ og_cols["c_unused"]       = 12
+ og_cols["c_luna_accent"]  = 13
+ og_cols["c_text"]         = 14
+ og_cols["c_phobos_outer"] = 15
+
+
+
+ if rand_sign() == 1 then
+  gods_eye_view = true
+ else
+  gods_eye_view = false
+ end
+ -- gods_eye_view = true
  alter_clear = false
  mono_palette = 1
  cam_smooth_factor = 60
@@ -115,9 +206,9 @@ function _init()
  blank_timer=blank_timer_max
 
  --trail parameters
- snapshot_rate=2
+ snapshot_rate=4
  snapshot_timer=snapshot_rate
- trail_length=300
+ trail_length=40
  trails = {} --the dead trails
 	
 	--keep planets in here
@@ -327,7 +418,7 @@ function _init()
 
 
  -- now some stars
- n_stars = 0
+ n_stars = 16
  star_spr_offset = 5
  star_spr_max = 11
  star_decay_rate = 15
@@ -468,6 +559,32 @@ function _draw()
  if alter_clear then
   cls()
  end
+ 
+ if use_dither then
+  -- for x=dither_amt,1,-1 do
+  --  local px_x = (flr(rnd(128) - 64)) + (rand_sign() * sx)
+  --  local px_y = (flr(rnd(128) - 64)) + (rand_sign() * sy) 
+  --  -- pset(px_x, px_y, bg_color)
+  --  rect(px_x-1,px_y-1,px_x+1,px_y+1,bg_color)
+  -- end
+  for i=1,dither_loops do 
+   local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
+   local fudge_y = (flr(rnd(4)) + 1) * rand_sign()
+   for x=128+fudge_x,0,-dither_rad do
+    for y=128+fudge_y,0,-dither_rad do
+     local px_x = (x - 64) + (rand_sign() * sx)
+     local px_y = (y - 64) + (rand_sign() * sy) 
+     if rnd(1) > dither_prob then
+      -- rect(px_x-1,px_y-1,px_x+1,px_y+1,bg_color)
+      -- circfill(px_x,px_y,dither_rad,bg_color)
+      circ(px_x,px_y,dither_rad,bg_color)
+
+     end
+    end
+   end
+  end
+ end
+
  camera(cam_xy[1]-64,cam_xy[2]-64)
 
  for i=#stars,1,-1 do
@@ -508,16 +625,16 @@ function _draw()
 
  --title screen
  if title_needed then
-  print(title, sx-63, sy-63)
-  print('press x/❎ to reset', sx-63, sy-56)
+  print(title, sx-63, sy-63, 14)
+  print('press x/❎ to reset', sx-63, sy-56, 14)
   local at = alter_title
-  print('press z/🅾️ to '..at, sx-63, sy-49)
-  print('seed: '..tostring(seed), sx-63, sy+59)
+  print('press z/🅾️ to '..at, sx-63, sy-49, 14)
+  print('seed: '..tostring(seed), sx-63, sy+59, 14)
  end
 
  if alter_stmt_needed then
-  print(alter_statement, sx-63, sy-63)
-  print('seed: '..tostring(seed), sx-63, sy+59)
+  print(alter_statement, sx-63, sy-63, 14)
+  print('seed: '..tostring(seed), sx-63, sy+59, 14)
  end
 
  --planets	
@@ -533,6 +650,9 @@ function _draw()
    draw_explosion(exp)
   end
  end
+
+draw_noise(noise_amt)
+draw_glitch(glitch_every_x_sec)
 
 --end draw()
 end
@@ -873,6 +993,27 @@ function get_rand_color()
  return(col)
 end
 
+
+function draw_noise(amt)
+    for i=0,amt*amt*amt do
+        poke(
+            0x6000+rnd(0x2000),
+            peek(rnd(0x7fff)))
+        poke(
+            0x6000+rnd(0x2000),
+            rnd(0xff))
+    end
+end
+
+function draw_glitch(gr)
+    local on=(t()*4.0)%gr<0.1
+    gso=on and 0 or rnd(0x1fff)\1
+    gln=on and 0x1ffe or rnd(0x1fff-gso)\16
+    for a=0x6000+gso,0x6000+gso+gln,rnd(16)\1 do
+        poke(a,peek(a+2),peek(a-1)+(rnd(3)))
+    end
+end
+
 -->8
 --seed
 
@@ -928,10 +1069,9 @@ end
 
 --022
 function alter_colors()
- for i=15,0,-1 do
-  local col = get_rand_color()
-  --printh(i.." "..col, "colors_debug.txt", true)
-  pal(i, col, mono_palette)
+ --define custom palette
+ for name, col in pairs(cols) do
+  pal(og_cols[name], cols[name], 1)
  end
 end
 
@@ -953,12 +1093,12 @@ end
 __gfx__
 000000000666d600000ffff088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000006666d6660fff99ff80088008332223330000000000000000000000000000000000000000000700000000000000000000000000000000000000000000
-00700700565555550ffff99f80088008332322230000000000700700000000000007000000707000000700000000700000000000000000000000000000000000
-000770005556d656ff9aaa9f88888888332333330000000000077000000700000077700000070000077770000077770000000000000000000000000000000000
+00700700665555560ffff99f80088008332322230000000000700700000000000007000000707000000700000000700000000000000000000000000000000000
+000770006556d656ff9aaa9f88888888332333330000000000077000000700000077700000070000077770000077770000000000000000000000000000000000
 000770006655d556ffaaaaff88888888323333230000700000077000000070000007000000707000007777000007700000000000000000000000000000000000
-0070070066d555600faa99f080088008233223230000000000700700000000000000000000000000000700000000700000000000000000000000000000000000
-0000000006d65d600ff99ff080088008333323330000000000000000000000000000000000000000000700000000000000000000000000000000000000000000
-000000000666666000ffff0088888888032333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0070070066d555600faa99f080088008333223230000000000700700000000000000000000000000000700000000700000000000000000000000000000000000
+0000000006d65d600ff99ff080088008332323330000000000000000000000000000000000000000000700000000000000000000000000000000000000000000
+000000000666666000ffff0088888888033333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000066000000aa00000000000000330000000000000000000000000000000000000000000000090000000908888a0908888a0900888a0900088a00000000
 0000000066000000aa00000000000000330000000000000000000000000000000000000000a00a0000a99a9088a99a9a88a99a9a88a09a900000900000000000
 000000000000000000000000000000000000000000000000000000000000000000000000000a0000099909000999080a0990080a090008000900080000000000
@@ -970,8 +1110,8 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000055695000000000000032000000000000000000000000000000000000000
-0000000000066000000aa0000000000000033000000000000000000000000000000059a99650000000000032a330000000000066600000000000000000000000
-0000000000066000000aa0000000000000033000000000000000000000000000000666d69ffff00000000fff393330000003333366d600000000000000000000
+00000000000110000004400000000000000bb000000000000000000000000000000059a99650000000000032a330000000000066600000000000000000000000
+00000000000110000004400000000000000bb000000000000000000000000000000666d69ffff00000000fff393330000003333366d600000000000000000000
 000000000000000000000000000000000000000000000000000000000000000006666699ff99ff00000fff99922333000033225566d666000000000000000000
 000000000000000000000000000000000000000000000000000000000000009305565955f5699f00000fff292aa2230000332522555555000000000000000000
 000000000000000000000000000000000000000000000000000000000000002a065599aa66aa9f0000ff9332a333330000332d6653d256000000000000000000
