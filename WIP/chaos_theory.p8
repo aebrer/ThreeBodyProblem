@@ -66,7 +66,7 @@ function _init()
  alter_pressed = false
 
  --title
- side = "b"
+ side = "c"
  alter_title = "gltch"
  alter_num = "024"..side
  title = "tbp_"..alter_num
@@ -145,7 +145,7 @@ function _init()
   cols["c_phobos_trail"] = bside_fg2
   cols["c_luna_core_1"]  = bside_fg2
   cols["c_luna_outer"]   = bside_fg3
-  cols["c_stars"]        = bside_fg1
+  cols["c_stars"]        = bside_text
   cols["c_explosion_1"]  = bside_text
   cols["c_phobos_vein"]  = bside_fg3
   cols["c_phobos_core"]  = bside_fg4
@@ -154,8 +154,33 @@ function _init()
   cols["c_luna_accent"]  = bside_fg4
   cols["c_text"]         = bside_text
   cols["c_phobos_outer"] = bside_fg1
+ elseif side == "c" then
+  --b-side palette
+    --a-side palette
+
+  local cside_bg = 128
+  local cside_fg = 136
+
+  cols["c_background"]   = cside_bg
+  cols["c_luna_trail"]   = cside_bg
+  cols["c_demos_vein"]   = cside_bg
+  cols["c_demos_outer"]  = cside_fg
+  cols["c_phobos_trail"] = cside_bg
+  cols["c_luna_core_1"]  = cside_fg
+  cols["c_luna_outer"]   = cside_fg
+  cols["c_stars"]        = cside_fg
+  cols["c_explosion_1"]  = cside_fg
+  cols["c_phobos_vein"]  = cside_bg
+  cols["c_phobos_core"]  = cside_fg
+  cols["c_demos_trail"]  = cside_bg
+  cols["c_unused"]       = cside_fg
+  cols["c_luna_accent"]  = cside_bg
+  cols["c_text"]         = cside_bg
+  cols["c_phobos_outer"] = cside_fg
+ 
  end
  
+
  og_cols = {}
  og_cols["c_background"]   = 0
  og_cols["c_luna_trail"]   = 1
