@@ -195,6 +195,8 @@ function _init()
   cols["c_unused"]       = cside_fg
   cols["c_luna_accent"]  = cside_fg
   cols["c_text"]         = cside_hl
+  cols["c_text"]         = cside_bg
+
   cols["c_phobos_outer"] = cside_fg
  
  end
