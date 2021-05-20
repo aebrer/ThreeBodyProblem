@@ -75,6 +75,13 @@ function _init()
  title_needed = true
  title_decay = 600
  
+ --varient_physics
+ if side == "c" then
+  seed = rnd_choice(seeds)
+  srand(seed)
+ end
+
+
  --display 
  -- -- all cols
  -- cols = {
@@ -101,14 +108,25 @@ function _init()
  glitch_every_x_sec = 13
  noise_amt = 1.0
 
+ if side == "c" then
+  dither_amt = 1000
+  use_dither = true
+  dither_prob = 0.85
+  dither_rad = 12
+  dither_loops = 6
+  glitch_every_x_sec = 4
+  noise_amt = 1.1
+ end
+
+
  --colors 
  cols = {}
  if side == "a" then
   --a-side palette
   local aside_bgs = {0,128,129}
   local aside_fgs = {139,3,8,136}
-  local aside_bg = aside_bgs[flr(rnd(#aside_bgs)) + 1]
-  local aside_fg = aside_fgs[flr(rnd(#aside_fgs)) + 1]
+  local aside_bg = rnd_choice(aside_bgs)
+  local aside_fg = rnd_choice(aside_fgs)
   cols["c_background"]   = aside_bg
   cols["c_luna_trail"]   = aside_fg
   cols["c_demos_vein"]   = aside_fg
@@ -130,12 +148,12 @@ function _init()
     --a-side palette
   local bside_bgs = {0,1,128,129, 130}
   local bside_fgs = {2,3,7,8,10,12,14,136,137,138,139,140,142,143,135}
-  local bside_bg = bside_bgs[flr(rnd(#bside_bgs)) + 1]
-  local bside_fg1 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
-  local bside_fg2 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
-  local bside_fg3 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
-  local bside_fg4 = bside_fgs[flr(rnd(#bside_fgs)) + 1]
-  local bside_text = bside_fgs[flr(rnd(#bside_fgs)) + 1]
+  local bside_bg = rnd_choice(bside_bgs)
+  local bside_fg1 = rnd_choice(bside_fgs)
+  local bside_fg2 = rnd_choice(bside_fgs)
+  local bside_fg3 = rnd_choice(bside_fgs)
+  local bside_fg4 = rnd_choice(bside_fgs)
+  local bside_text = rnd_choice(bside_fgs)
 
 
   cols["c_background"]   = bside_bg
@@ -160,22 +178,23 @@ function _init()
 
   local cside_bg = 128
   local cside_fg = 136
+  local cside_hl = 8
 
   cols["c_background"]   = cside_bg
-  cols["c_luna_trail"]   = cside_bg
-  cols["c_demos_vein"]   = cside_bg
+  cols["c_luna_trail"]   = cside_fg
+  cols["c_demos_vein"]   = cside_fg
   cols["c_demos_outer"]  = cside_fg
-  cols["c_phobos_trail"] = cside_bg
+  cols["c_phobos_trail"] = cside_fg
   cols["c_luna_core_1"]  = cside_fg
   cols["c_luna_outer"]   = cside_fg
   cols["c_stars"]        = cside_fg
   cols["c_explosion_1"]  = cside_fg
-  cols["c_phobos_vein"]  = cside_bg
+  cols["c_phobos_vein"]  = cside_fg
   cols["c_phobos_core"]  = cside_fg
-  cols["c_demos_trail"]  = cside_bg
+  cols["c_demos_trail"]  = cside_fg
   cols["c_unused"]       = cside_fg
-  cols["c_luna_accent"]  = cside_bg
-  cols["c_text"]         = cside_bg
+  cols["c_luna_accent"]  = cside_fg
+  cols["c_text"]         = cside_hl
   cols["c_phobos_outer"] = cside_fg
  
  end
@@ -205,6 +224,9 @@ function _init()
   gods_eye_view = true
  else
   gods_eye_view = false
+  if side == "c" then
+   gods_eye_view = true
+  end
  end
  -- gods_eye_view = true
  alter_clear = false
@@ -235,6 +257,12 @@ function _init()
  snapshot_timer=snapshot_rate
  trail_length=40
  trails = {} --the dead trails
+
+ if side == "c" then
+  snapshot_rate=2
+  snapshot_timer=snapshot_rate
+  trail_length=50
+ end
 	
 	--keep planets in here
 	planets = {}
@@ -1010,14 +1038,6 @@ function ofst(a, x, y)
  return(b)
 end
 
-function get_rand_color()
- local col_i = flr(rnd(#cols)) + 1
- --printh(col_i, "colors_debug.txt", true)
- local col = cols[col_i]
- --printh(col, "colors_debug.txt", true)
- return(col)
-end
-
 
 function draw_noise(amt)
     for i=0,amt*amt*amt do
@@ -1039,6 +1059,11 @@ function draw_glitch(gr)
     end
 end
 
+function rnd_choice(itr)
+ local i = flr(rnd(#itr)) + 1
+ return(itr[i])
+end
+
 -->8
 --seed
 
@@ -1046,6 +1071,11 @@ seed = flr(rnd(-1)) + 1
 -- don't need to reseve seeds anymore
 -- due to physics engine being different
 srand(seed)
+
+seeds = {
+ -23163, -8963, 25168, 15546,
+ -6259, 21150,16012 
+}
 
 -->8
 --alter
