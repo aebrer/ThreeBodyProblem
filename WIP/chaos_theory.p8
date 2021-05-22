@@ -66,7 +66,7 @@ function _init()
  alter_pressed = false
 
  --title
- side = "c"
+ side = "b"
  alter_title = "gltch"
  alter_num = "024"..side
  title = "tbp_"..alter_num
@@ -74,48 +74,37 @@ function _init()
  title = title..alter_title
  title_needed = true
  title_decay = 600
- 
- --varient_physics
- if side == "c" then
-  seed = rnd_choice(seeds)
-  srand(seed)
+
+ --seed
+ seed = flr(rnd(-1)) + 1
+ b_seeds = {-9852}
+ c_seeds = {
+  -23163, -8963, 25168, 15546,
+  -6259, 21150,16012 
+ }
+ if side == "b" then
+  --seed = rnd_choice(b_seeds)
+ elseif side == "c" then
+  seed = rnd_choice(c_seeds)
  end
+ srand(seed)
 
-
- --display 
- -- -- all cols
- -- cols = {
- --  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
- --  128,129,130,131,132,133,134,135,136,
- --  137,138,139,140,141,142,143
- -- }
- -- cols = {
- --  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
- --  129,130,131,134,135,136,
- --  137,138,139,140,141,142,143
- -- }
- -- --muted colors
- --  cols = {
- --  0,1,2,5,7,8,9,10,12,
- --  128,129,130,132,133,136,
- --  137,140,141,142,143
- -- }
- dither_amt = 1000
  use_dither = true
- dither_prob = 0.85
- dither_rad = 12
- dither_loops = 6
  glitch_every_x_sec = 13
  noise_amt = 1.0
 
- if side == "c" then
-  dither_amt = 1000
-  use_dither = true
-  dither_prob = 0.85
-  dither_rad = 12
-  dither_loops = 6
+ dither_mode = "circles"
+ dither_modes = {"circles"} 
+ dither_prob = 0.85
+
+ if side == "b" then
+  dither_prob = 0.55
+  add(dither_modes, "burn")
+  dither_mode="burn"
+ elseif side == "c" then
   glitch_every_x_sec = 4
   noise_amt = 1.1
+  dither_prob = 0.94
  end
 
 
@@ -123,8 +112,8 @@ function _init()
  cols = {}
  if side == "a" then
   --a-side palette
-  local aside_bgs = {0,128,129}
-  local aside_fgs = {139,3,8,136}
+  local aside_bgs = {0,-1,-2}
+  local aside_fgs = {-12,3,8,-9}
   local aside_bg = rnd_choice(aside_bgs)
   local aside_fg = rnd_choice(aside_fgs)
   cols["c_background"]   = aside_bg
@@ -144,40 +133,53 @@ function _init()
   cols["c_text"]         = aside_fg
   cols["c_phobos_outer"] = aside_fg
  elseif side == "b" then
-  --b-side palette
-    --a-side palette
-  local bside_bgs = {0,1,128,129, 130}
-  local bside_fgs = {2,3,7,8,10,12,14,136,137,138,139,140,142,143,135}
-  local bside_bg = rnd_choice(bside_bgs)
-  local bside_fg1 = rnd_choice(bside_fgs)
-  local bside_fg2 = rnd_choice(bside_fgs)
-  local bside_fg3 = rnd_choice(bside_fgs)
-  local bside_fg4 = rnd_choice(bside_fgs)
-  local bside_text = rnd_choice(bside_fgs)
+  -- --b-side palette
+
+  burn_pal = {
+   "0", "-16", "-14", 
+   "-11", "-3", "13", 
+   "6", "7"
+  }
+
+  local c_background = tonum(burn_pal[1])
+  local c_vein = tonum(burn_pal[2])
+  local c_accent = tonum(burn_pal[3])
+  local c_unused = tonum(burn_pal[4])
+  local c_trail = tonum(burn_pal[5])
+  local c_core = tonum(burn_pal[6])
+  local c_outer = tonum(burn_pal[7])
+  local c_text = tonum(burn_pal[8])
+
+  burn_pal_key = {}
+  for i=1,#burn_pal do
+   burn_pal_key[burn_pal[i]] = i
+  end
+
+  printh(tostring(burn_pal))
+  printh(tostring(burn_pal_key))
+
+  cols["c_background"]   = c_background
+  cols["c_luna_trail"]   = c_trail
+  cols["c_demos_vein"]   = c_core
+  cols["c_demos_outer"]  = c_outer
+  cols["c_phobos_trail"] = c_trail
+  cols["c_luna_core_1"]  = c_core
+  cols["c_luna_outer"]   = c_outer
+  cols["c_stars"]        = c_text
+  cols["c_explosion_1"]  = c_text
+  cols["c_phobos_vein"]  = c_core
+  cols["c_phobos_core"]  = c_core
+  cols["c_demos_trail"]  = c_trail
+  cols["c_unused"]       = c_unused
+  cols["c_luna_accent"]  = c_core
+  cols["c_text"]         = c_text
+  cols["c_text"]         = c_background
+  cols["c_phobos_outer"] = c_outer
 
 
-  cols["c_background"]   = bside_bg
-  cols["c_luna_trail"]   = bside_fg1
-  cols["c_demos_vein"]   = bside_fg1
-  cols["c_demos_outer"]  = bside_fg2
-  cols["c_phobos_trail"] = bside_fg2
-  cols["c_luna_core_1"]  = bside_fg2
-  cols["c_luna_outer"]   = bside_fg3
-  cols["c_stars"]        = bside_text
-  cols["c_explosion_1"]  = bside_text
-  cols["c_phobos_vein"]  = bside_fg3
-  cols["c_phobos_core"]  = bside_fg4
-  cols["c_demos_trail"]  = bside_fg3
-  cols["c_unused"]       = bside_text
-  cols["c_luna_accent"]  = bside_fg4
-  cols["c_text"]         = bside_text
-  cols["c_phobos_outer"] = bside_fg1
  elseif side == "c" then
-  --b-side palette
-    --a-side palette
-
-  local cside_bg = 128
-  local cside_fg = 136
+  local cside_bg = -1
+  local cside_fg = -9
   local cside_hl = 8
 
   cols["c_background"]   = cside_bg
@@ -195,8 +197,6 @@ function _init()
   cols["c_unused"]       = cside_fg
   cols["c_luna_accent"]  = cside_fg
   cols["c_text"]         = cside_hl
-  cols["c_text"]         = cside_bg
-
   cols["c_phobos_outer"] = cside_fg
  
  end
@@ -220,7 +220,20 @@ function _init()
  og_cols["c_text"]         = 14
  og_cols["c_phobos_outer"] = 15
 
+ cmap_new_old = {}
+ cmap_old_new = {}
+ local counter = 0
+ for name, col in pairs(og_cols) do
+  cmap_new_old[tostring(cols[name])] = tostring(og_cols[name])
+  cmap_old_new[tostring(og_cols[name])] = tostring(cols[name])
+  printh("cycle"..counter)
+  counter+=1
+  printh(name)
+  printh(cols[name])
+  printh(og_cols[name])
+ end
 
+ printh(tostring(cmap_new_old))
 
  if rand_sign() == 1 then
   gods_eye_view = true
@@ -239,7 +252,7 @@ function _init()
 
  --physics
  collision_distance = 1.99
- rad_o_g = 1.8
+ rad_o_g = 1.5
  --speed and force limits
 	min_speed = -100.0
 	max_speed = 100.0
@@ -286,9 +299,6 @@ function _init()
     m=15.0,
     vx=rnd(0.2) * x_sign,
     vy=rnd(1.0)+0.2 * y_sign,
-    --vx=0.2,
-    --vy=0.1,
-    f=0,
     ix=0,
     iy=0,
     offscreen=false,
@@ -306,16 +316,11 @@ function _init()
   name="demos",
   x=rnd(128) * 1.0,
   y=rnd(128) * 1.0,
-  --x=-64,
-  --y=80,
   old_x=0.0,
   old_y=0.0,
   m=15.0,
   vx=rnd(0.2) * x_sign,
   vy=rnd(0.1)+0.1 * y_sign,
-  --vx=1.2,
-  --vy=-0.05,
-  f=0,
   ix=0,
   iy=0,
   offscreen=false,
@@ -333,14 +338,11 @@ function _init()
   name="luna",
    x=rnd(64),
    y=rnd(64) * rand_sign(),
-   --x=-64,
-   --y=140,
    old_x=0.0,
    old_y=0.0,
    m=15.0,
    vx=rnd(1.2) * x_sign,
    vy=rnd(0.2)+0.2 * y_sign,
-   f=0,
    ix=0,
    iy=0,
    offscreen=false,
@@ -365,8 +367,7 @@ function _init()
  	m=28.0,
   vx=rnd(0.2) * rand_sign(),
   vy=rnd(1.1)+0.1 * rand_sign(),
-	 f=0,
-	 ix=0,
+  ix=0,
 	 iy=0,
 	 offscreen=false,
 	 history={},
@@ -389,9 +390,8 @@ function _init()
   old_y=0.0,
  	m=28.0,
  	vx=0,
-	 vy=0,
-	 f=0,
-	 ix=0,
+	 vy=0, 
+  ix=0,
 	 iy=0,
 	 offscreen=false,
 	 history={},
@@ -413,9 +413,8 @@ function _init()
   old_y=0.0,
  	m=28.0,
  	vx=0,
-	 vy=0,
-	 f=0,
-	 ix=0,
+	 vy=0, 
+  ix=0,
 	 iy=0,
 	 offscreen=false,
 	 history={},
@@ -443,9 +442,8 @@ function _init()
   old_y=0.0,
  	m=55.0,
  	vx=0,
-	 vy=0,
-	 f=0,
-	 ix=0,
+	 vy=0,	 
+  ix=0,
 	 iy=0,
 	 offscreen=false,
 	 history={},
@@ -490,9 +488,7 @@ function move_planet(p)
 	
 	for name2, p2 in pairs(planets) do
  	local dist=0
- 	local angle=0
- 	local force=0
- 	
+
  	if not(p2==p) and not p.crashed then
  		--calculate distance
  		dist=approx_dist(p2.old_x-p.old_x,p2.old_y-p.old_y)
@@ -569,8 +565,7 @@ function move_planet(p)
 
    -- planets are not crashed, keep moving
 
- 		--get angle of force vec
- 		--angle = atan2(p.x-p2.x,p.y-p2.y)
+ 		--get direction of force vec
  		xdist = (p2.old_x-p.old_x)/dist * -1
  		ydist = (p2.old_y-p.old_y)/dist * -1
  		
@@ -578,14 +573,13 @@ function move_planet(p)
  		force = ((p.m * p2.m * (6.67*10^-3)) / dist^rad_o_g)
   	force = min(force, max_force)
   	force = max(force, min_force)
- 		--record of ath force
- 		p.f = max(force, p.f)
- 		--get componants of force
- 		p.vx=p.vx-force * xdist
- 		--p.vx=p.vx-force * cos(angle)
- 		p.vy=p.vy-force * ydist
- 		--p.vy=p.vy-force * sin(angle)
- 	end
+ 		
+   -- --euler
+   --get componants of force
+ 		p.vx = p.vx - force * xdist
+ 		p.vy = p.vy - force * ydist
+  end
+
  end
  	
  --speed limits
@@ -595,11 +589,7 @@ function move_planet(p)
  p.vy = min(p.vy, max_speed)
  
  --actually move
- --show flowers
- --p.x += p.vx -sx+64
- --p.y += p.vy -sy+64
- --show what einstein was talking about
- p.x += p.vx
+ p.x += p.vx 
  p.y += p.vy
 
 end
@@ -621,23 +611,7 @@ function _draw()
   --  local px_y = (flr(rnd(128) - 64)) + (rand_sign() * sy) 
   --  -- pset(px_x, px_y, bg_color)
   --  rect(px_x-1,px_y-1,px_x+1,px_y+1,bg_color)
-  -- end
-  for i=1,dither_loops do 
-   local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
-   local fudge_y = (flr(rnd(4)) + 1) * rand_sign()
-   for x=128+fudge_x,0,-dither_rad do
-    for y=128+fudge_y,0,-dither_rad do
-     local px_x = (x - 64) + (rand_sign() * sx)
-     local px_y = (y - 64) + (rand_sign() * sy) 
-     if rnd(1) > dither_prob then
-      -- rect(px_x-1,px_y-1,px_x+1,px_y+1,bg_color)
-      -- circfill(px_x,px_y,dither_rad,bg_color)
-      circ(px_x,px_y,dither_rad,bg_color)
-
-     end
-    end
-   end
-  end
+  dither(dither_mode)
  end
 
  camera(cam_xy[1]-64,cam_xy[2]-64)
@@ -823,7 +797,6 @@ function _update60()
 	 alter_stmt_decay = as
 	 alter_stmt_needed=false
 	end
- 
  
  if alter_pressed then
   if alter_effect_decay<0 then
@@ -1066,18 +1039,68 @@ function rnd_choice(itr)
  return(itr[i])
 end
 
--->8
---seed
+function vfx_smoothing()
+ local pixel = rnd_pixel()
+ c=abs(pget(pixel.x,pixel.y)-1) 
+end
 
-seed = flr(rnd(-1)) + 1
--- don't need to reseve seeds anymore
--- due to physics engine being different
-srand(seed)
+function rnd_pixel()
+ local px_x = (rnd(128) - 64) + (rand_sign() * sx)
+ local px_y = (rnd(128) - 64) + (rand_sign() * sy)
+ local pixel = {
+  x=px_x,
+  y=px_y
+ }
+ return(pixel)
+end
 
-seeds = {
- -23163, -8963, 25168, 15546,
- -6259, 21150,16012 
-}
+function dither(dm)
+ if dm == 0 then
+  dither(rnd_choice(dither_modes))
+ elseif dm == "circles" then
+  for i=1,6 do 
+   local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
+   local fudge_y = (flr(rnd(4)) + 1) * rand_sign()
+   --skip some nunber (12) pixels
+   for x=128+fudge_x,0,-12 do
+    for y=128+fudge_y,0,-12 do
+     local pxl = rnd_pixel()
+     if rnd(1) > dither_prob then
+      -- rect(px_x-1,px_y-1,px_x+1,px_y+1,bg_color)
+      -- circfill(px_x,px_y,dither_rad,bg_color)
+      circ(pxl.x,pxl.y,16,bg_color)
+     end
+    end
+   end
+  end
+ elseif dm == "burn" then
+  for i=500,1,-1 do
+   local pxl = rnd_pixel()
+   c=pget(pxl.x,pxl.y)
+   -- printh(c)
+   circfill(pxl.x,pxl.y,2,burn(c))
+  end
+ end
+end
+
+function burn(c)
+ --given og color
+ --get new color
+ --printh(c)
+ local real_c = cmap_old_new[tostring(c)]
+ --given new color
+ --get gradient pos
+ --printh(real_c)
+ --printh(burn_pal_key[real_c])
+ local grad_i = burn_pal_key[real_c]
+ --printh(grad_i)
+ --given gradient, get new color to use
+ local new_real_c = burn_pal[max(grad_i-1, 1)] 
+ --now convert back to
+ --color needed for pset
+ local new_c = tonum(cmap_new_old[new_real_c])
+ return(new_c)
+end
 
 -->8
 --alter
