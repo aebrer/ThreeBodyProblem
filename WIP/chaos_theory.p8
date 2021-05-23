@@ -61,12 +61,12 @@ function _init()
  alter_effect_decay = 0
  alter_stmt_needed=true
  alter_statement = ""
- alter_stmt_rate = 120
+ alter_stmt_rate = 240
  alter_effect_rate = 60
  alter_pressed = false
 
  --title
- side = "b"
+ side = "p"
  alter_title = "gltch"
  alter_num = "024"..side
  title = "tbp_"..alter_num
@@ -77,14 +77,14 @@ function _init()
 
  --seed
  seed = flr(rnd(-1)) + 1
- b_seeds = {-9852}
+ b_seeds = {-1675, -20927, 8610}
  c_seeds = {
   -23163, -8963, 25168, 15546,
   -6259, 21150,16012 
  }
- if side == "b" then
-  --seed = rnd_choice(b_seeds)
- elseif side == "c" then
+ if side == "l" then
+  seed = rnd_choice(b_seeds)
+ elseif side == "p" then
   seed = rnd_choice(c_seeds)
  end
  srand(seed)
@@ -93,33 +93,49 @@ function _init()
  glitch_every_x_sec = 13
  noise_amt = 1.0
 
- dither_mode = "circles"
- dither_modes = {"circles"} 
+ dither_mode = "mixed"
+ dither_modes = {
+  "mixed",
+  "circles", 
+  "circfill", 
+  "rect"
+ } 
  dither_prob = 0.85
 
- if side == "b" then
+ if side == "l" then
   dither_prob = 0.55
-  add(dither_modes, "burn")
-  dither_mode="burn"
- elseif side == "c" then
-  glitch_every_x_sec = 4
-  noise_amt = 1.1
-  dither_prob = 0.94
+  local burn_dither_modes = { 
+   "burn_spiral",
+   "burn_rect",
+   "burn"
+  }
+  for dm in all(dither_modes) do
+   add(burn_dither_modes, dm)
+  end
+  dither_modes = burn_dither_modes
+  dither_mode="burn_spiral"
+ elseif side == "p" then
+  glitch_every_x_sec = 8
+  noise_amt = 1.05
+  dither_prob = 0.5
+  dither_mode = "rect"
  end
 
+ n_dither_modes = #dither_modes
+ alter_dither_i = 1
 
  --colors 
  cols = {}
- if side == "a" then
+ if side == "d" then
   --a-side palette
-  local aside_bgs = {0,-1,-2}
-  local aside_fgs = {-12,3,8,-9}
+  local aside_bgs = {0,-16,-15}
+  local aside_fgs = {-5,-8,8,11,3}
   local aside_bg = rnd_choice(aside_bgs)
   local aside_fg = rnd_choice(aside_fgs)
   cols["c_background"]   = aside_bg
   cols["c_luna_trail"]   = aside_fg
-  cols["c_demos_vein"]   = aside_fg
-  cols["c_demos_outer"]  = aside_fg
+  cols["c_deimos_vein"]   = aside_fg
+  cols["c_deimos_outer"]  = aside_fg
   cols["c_phobos_trail"] = aside_fg
   cols["c_luna_core_1"]  = aside_fg
   cols["c_luna_outer"]   = aside_fg
@@ -127,12 +143,12 @@ function _init()
   cols["c_explosion_1"]  = aside_fg
   cols["c_phobos_vein"]  = aside_fg
   cols["c_phobos_core"]  = aside_fg
-  cols["c_demos_trail"]  = aside_fg
+  cols["c_deimos_trail"]  = aside_fg
   cols["c_unused"]       = aside_fg
   cols["c_luna_accent"]  = aside_fg
   cols["c_text"]         = aside_fg
   cols["c_phobos_outer"] = aside_fg
- elseif side == "b" then
+ elseif side == "l" then
   -- --b-side palette
 
   burn_pal = {
@@ -155,13 +171,10 @@ function _init()
    burn_pal_key[burn_pal[i]] = i
   end
 
-  printh(tostring(burn_pal))
-  printh(tostring(burn_pal_key))
-
   cols["c_background"]   = c_background
   cols["c_luna_trail"]   = c_trail
-  cols["c_demos_vein"]   = c_core
-  cols["c_demos_outer"]  = c_outer
+  cols["c_deimos_vein"]   = c_core
+  cols["c_deimos_outer"]  = c_outer
   cols["c_phobos_trail"] = c_trail
   cols["c_luna_core_1"]  = c_core
   cols["c_luna_outer"]   = c_outer
@@ -169,23 +182,22 @@ function _init()
   cols["c_explosion_1"]  = c_text
   cols["c_phobos_vein"]  = c_core
   cols["c_phobos_core"]  = c_core
-  cols["c_demos_trail"]  = c_trail
+  cols["c_deimos_trail"]  = c_trail
   cols["c_unused"]       = c_unused
   cols["c_luna_accent"]  = c_core
   cols["c_text"]         = c_text
-  cols["c_text"]         = c_background
   cols["c_phobos_outer"] = c_outer
 
 
- elseif side == "c" then
-  local cside_bg = -1
-  local cside_fg = -9
+ elseif side == "p" then
+  local cside_bg = -16
+  local cside_fg = -8
   local cside_hl = 8
 
   cols["c_background"]   = cside_bg
   cols["c_luna_trail"]   = cside_fg
-  cols["c_demos_vein"]   = cside_fg
-  cols["c_demos_outer"]  = cside_fg
+  cols["c_deimos_vein"]   = cside_fg
+  cols["c_deimos_outer"]  = cside_fg
   cols["c_phobos_trail"] = cside_fg
   cols["c_luna_core_1"]  = cside_fg
   cols["c_luna_outer"]   = cside_fg
@@ -193,7 +205,7 @@ function _init()
   cols["c_explosion_1"]  = cside_fg
   cols["c_phobos_vein"]  = cside_fg
   cols["c_phobos_core"]  = cside_fg
-  cols["c_demos_trail"]  = cside_fg
+  cols["c_deimos_trail"]  = cside_fg
   cols["c_unused"]       = cside_fg
   cols["c_luna_accent"]  = cside_fg
   cols["c_text"]         = cside_hl
@@ -205,8 +217,8 @@ function _init()
  og_cols = {}
  og_cols["c_background"]   = 0
  og_cols["c_luna_trail"]   = 1
- og_cols["c_demos_vein"]   = 2
- og_cols["c_demos_outer"]  = 3
+ og_cols["c_deimos_vein"]   = 2
+ og_cols["c_deimos_outer"]  = 3
  og_cols["c_phobos_trail"] = 4
  og_cols["c_luna_core_1"]  = 5
  og_cols["c_luna_outer"]   = 6
@@ -214,7 +226,7 @@ function _init()
  og_cols["c_explosion_1"]  = 8
  og_cols["c_phobos_vein"]  = 9
  og_cols["c_phobos_core"]  = 10
- og_cols["c_demos_trail"]  = 11
+ og_cols["c_deimos_trail"]  = 11
  og_cols["c_unused"]       = 12
  og_cols["c_luna_accent"]  = 13
  og_cols["c_text"]         = 14
@@ -226,25 +238,18 @@ function _init()
  for name, col in pairs(og_cols) do
   cmap_new_old[tostring(cols[name])] = tostring(og_cols[name])
   cmap_old_new[tostring(og_cols[name])] = tostring(cols[name])
-  printh("cycle"..counter)
   counter+=1
-  printh(name)
-  printh(cols[name])
-  printh(og_cols[name])
  end
-
- printh(tostring(cmap_new_old))
 
  if rand_sign() == 1 then
   gods_eye_view = true
  else
   gods_eye_view = false
-  if side == "c" then
+  if side == "p" then
    gods_eye_view = true
   end
  end
  -- gods_eye_view = true
- alter_clear = false
  mono_palette = 1
  cam_smooth_factor = 60
  cam_xy = {0,0}
@@ -273,7 +278,11 @@ function _init()
  trail_length=40
  trails = {} --the dead trails
 
- if side == "c" then
+
+ if side == "l" then
+  snapshot_rate=16000
+  trail_length=1
+ elseif side == "p" then
   snapshot_rate=2
   snapshot_timer=snapshot_rate
   trail_length=50
@@ -312,8 +321,8 @@ function _init()
  }
  planets["phobos"] = phobos
 	
- demos = {
-  name="demos",
+ deimos = {
+  name="deimos",
   x=rnd(128) * 1.0,
   y=rnd(128) * 1.0,
   old_x=0.0,
@@ -332,7 +341,7 @@ function _init()
   spr_range_x=1,
   spr_range_y=1
  }
- planets["demos"] = demos
+ planets["deimos"] = deimos
 
  luna = {
   name="luna",
@@ -358,8 +367,8 @@ function _init()
 	
 	-- premake the double planets
 	big_planets = {}
-	phobosdemos = {
-	 name="phobosdemos",
+	phobosdeimos = {
+	 name="phobosdeimos",
  	x=rnd(64) + 64,
   y=luna.y * rand_sign() + 30 * rand_sign(),
   old_x=0.0,
@@ -379,8 +388,8 @@ function _init()
 	 spr_range_y=2
 	}
 	
- -- planets["phobosdemos"] = phobosdemos
-	big_planets["phobosdemos"] = phobosdemos
+ -- planets["phobosdeimos"] = phobosdeimos
+	big_planets["phobosdeimos"] = phobosdeimos
 	
 	phobosluna = {
 	 name="phobosluna",
@@ -405,8 +414,8 @@ function _init()
 	big_planets["phobosluna"] = phobosluna
  -- planets["phobosluna"] = phobosluna
 
-	demosluna = {
-	 name="demosluna",
+	deimosluna = {
+	 name="deimosluna",
  	x=rnd(128) * 1.0,
   y=rnd(128) * 1.0,
   old_x=0.0,
@@ -425,13 +434,13 @@ function _init()
 	 spr_range_x=2,
 	 spr_range_y=2
 	}
-	big_planets["demosluna"] = demosluna
- -- planets["demosluna"] = demosluna
+	big_planets["deimosluna"] = deimosluna
+ -- planets["deimosluna"] = deimosluna
 	
 	double_planet_names = {
-	 "demosluna",
+	 "deimosluna",
 	 "phobosluna",
-	 "phobosdemos"
+	 "phobosdeimos"
 	}
 	
 	behemoth = {
@@ -601,16 +610,7 @@ end
 function _draw()
  
  --display
- if alter_clear then
-  cls()
- end
- 
  if use_dither then
-  -- for x=dither_amt,1,-1 do
-  --  local px_x = (flr(rnd(128) - 64)) + (rand_sign() * sx)
-  --  local px_y = (flr(rnd(128) - 64)) + (rand_sign() * sy) 
-  --  -- pset(px_x, px_y, bg_color)
-  --  rect(px_x-1,px_y-1,px_x+1,px_y+1,bg_color)
   dither(dither_mode)
  end
 
@@ -652,20 +652,6 @@ function _draw()
  end
  --end
 
- --title screen
- if title_needed then
-  print(title, sx-63, sy-63, 14)
-  print('press x/❎ to reset', sx-63, sy-56, 14)
-  local at = alter_title
-  print('press z/🅾️ to '..at, sx-63, sy-49, 14)
-  print('seed: '..tostring(seed), sx-63, sy+59, 14)
- end
-
- if alter_stmt_needed then
-  print(alter_statement, sx-63, sy-63, 14)
-  print('seed: '..tostring(seed), sx-63, sy+59, 14)
- end
-
  --planets	
  for name, p in pairs(planets) do
   draw_planet(p)
@@ -680,8 +666,29 @@ function _draw()
   end
  end
 
-draw_noise(noise_amt)
-draw_glitch(glitch_every_x_sec)
+ draw_noise(noise_amt)
+ draw_glitch(glitch_every_x_sec)
+
+ --title screen
+ if title_needed then
+  print(title, sx-63, sy-63, og_cols["c_background"])
+  print(title, sx-64, sy-64, og_cols["c_text"])
+
+  print('press x/❎ to reset', sx-64, sy-57, og_cols["c_background"])
+  print('press x/❎ to reset', sx-63, sy-56, og_cols["c_text"])
+  local at = alter_title
+  print('press z/🅾️ to '..at, sx-64, sy-50, og_cols["c_background"])
+  print('press z/🅾️ to '..at, sx-63, sy-49, og_cols["c_text"])
+  print('seed: '..tostring(seed), sx-64, sy+58, og_cols["c_background"])
+  print('seed: '..tostring(seed), sx-63, sy+59, og_cols["c_text"])
+ end
+
+ if alter_stmt_needed then
+  print(alter_statement, sx-15, sy+58, og_cols["c_background"])
+  print(alter_statement, sx-14, sy+59, og_cols["c_text"])
+  print('seed: '..tostring(seed), sx-64, sy+58, og_cols["c_background"])
+  print('seed: '..tostring(seed), sx-63, sy+59, og_cols["c_text"])
+ end
 
 --end draw()
 end
@@ -803,7 +810,7 @@ function _update60()
    local aer=alter_effect_rate
    alter_effect_decay=aer
    alter_pressed = false
-   alter_frame()
+   alter_dither()
   end
   alter_stmt_needed=true
 	end
@@ -829,13 +836,7 @@ function _update60()
 	end 
 	
 	if btn(4) then
-  --reset_needed=true
 	 --z/🅾️ button
-	 --018--inc_min_force()
-	 --019--rad_o_g = inc_rad_o_g(rad_o_g)
-	 --020--alter_stars
-  --021--alter_dream
-  --022--alter_colors
 	 alter_pressed = true
   alter_stmt_needed = true
  else
@@ -1055,8 +1056,10 @@ function rnd_pixel()
 end
 
 function dither(dm)
- if dm == 0 then
+ if dm == "mixed" then
   dither(rnd_choice(dither_modes))
+ elseif dm == "cls" then
+  cls()
  elseif dm == "circles" then
   for i=1,6 do 
    local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
@@ -1066,19 +1069,70 @@ function dither(dm)
     for y=128+fudge_y,0,-12 do
      local pxl = rnd_pixel()
      if rnd(1) > dither_prob then
-      -- rect(px_x-1,px_y-1,px_x+1,px_y+1,bg_color)
-      -- circfill(px_x,px_y,dither_rad,bg_color)
       circ(pxl.x,pxl.y,16,bg_color)
      end
     end
    end
   end
- elseif dm == "burn" then
+ elseif dm == "circfill" then
+  for i=1,6 do 
+   local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
+   local fudge_y = (flr(rnd(4)) + 1) * rand_sign()
+   --skip some nunber (12) pixels
+   for x=128+fudge_x,0,-12 do
+    for y=128+fudge_y,0,-12 do
+     local pxl = rnd_pixel()
+     if rnd(1) > dither_prob then
+      circfill(pxl.x,pxl.y,4,bg_color)
+     end
+    end
+   end
+  end
+ elseif dm == "rect" then
+  for i=1,6 do 
+   local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
+   local fudge_y = (flr(rnd(4)) + 1) * rand_sign()
+   --skip some nunber (12) pixels
+   for x=128+fudge_x,0,-12 do
+    for y=128+fudge_y,0,-12 do
+     local pxl = rnd_pixel()
+     if rnd(1) > dither_prob then
+      rect(pxl.x-1,pxl.y-1,pxl.x+1,pxl.y+1,bg_color)
+     end
+    end
+   end
+  end
+ elseif dm == "burn_spiral" then
   for i=500,1,-1 do
    local pxl = rnd_pixel()
    c=pget(pxl.x,pxl.y)
-   -- printh(c)
-   circfill(pxl.x,pxl.y,2,burn(c))
+   circ(pxl.x,pxl.y,2,burn(c))
+  end
+ elseif dm == "burn" then
+  for i=1,4 do 
+   local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
+   local fudge_y = (flr(rnd(4)) + 1) * rand_sign()
+   --skip some nunber (12) pixels
+   for x=128+fudge_x,0,-12 do
+    for y=128+fudge_y,0,-12 do
+     local pxl = rnd_pixel()
+      c=pget(pxl.x,pxl.y)
+      circ(pxl.x,pxl.y,1,burn(c))
+    end
+   end
+  end
+ elseif dm == "burn_rect" then
+  for i=1,4 do 
+   local fudge_x = (flr(rnd(4)) + 1) * rand_sign()
+   local fudge_y = (flr(rnd(4)) + 1) * rand_sign()
+   --skip some nunber (12) pixels
+   for x=128+fudge_x,0,-12 do
+    for y=128+fudge_y,0,-12 do
+     local pxl = rnd_pixel()
+      c=pget(pxl.x,pxl.y)
+      rect(pxl.x-1,pxl.y-1,pxl.x+1,pxl.y+1,burn(c))
+    end
+   end
   end
  end
 end
@@ -1101,6 +1155,29 @@ function burn(c)
  local new_c = tonum(cmap_new_old[new_real_c])
  return(new_c)
 end
+
+function burn_loop(c)
+ --given og color
+ --get new color
+ --printh(c)
+ local real_c = cmap_old_new[tostring(c)]
+ --given new color
+ --get gradient pos
+ --printh(real_c)
+ --printh(burn_pal_key[real_c])
+ local grad_i = burn_pal_key[real_c]
+ --printh(grad_i)
+ --given gradient, get new color to use
+ if grad_i == 1 then
+  grad_i = #burn_pal_key
+ end
+ local new_real_c = burn_pal[grad_i-1] 
+ --now convert back to
+ --color needed for pset
+ local new_c = tonum(cmap_new_old[new_real_c])
+ return(new_c)
+end
+
 
 -->8
 --alter
@@ -1167,6 +1244,21 @@ function alter_frame()
   p.history = {}
  end
  trails = {}
+end
+
+--024
+function alter_dither()
+ local old_dither_mode = dither_mode
+ 
+ while dither_mode == old_dither_mode do
+  dither_mode = dither_modes[alter_dither_i]
+  alter_dither_i += 1
+  if alter_dither_i > n_dither_modes then
+   alter_dither_i = 1
+  end
+ end 
+ text="dither: "
+ alter_statement = text..dither_mode
 end
 
 

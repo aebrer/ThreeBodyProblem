@@ -28,3 +28,6 @@ NULL. 2body https://www.hicetnunc.xyz/objkt/82984
 22. COLOR https://www.hicetnunc.xyz/objkt/81375
 23A. FRAME https://www.hicetnunc.xyz/objkt/84169
 23B. FRAME https://www.hicetnunc.xyz/objkt/84171
+24L. GLTCH https://www.hicetnunc.xyz/objkt/94464
+24D. GLTCH https://www.hicetnunc.xyz/objkt/94470
+24P. GLTCH https://www.hicetnunc.xyz/objkt/94482
