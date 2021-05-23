@@ -66,7 +66,7 @@ function _init()
  alter_pressed = false
 
  --title
- side = "p"
+ side = "d"
  alter_title = "gltch"
  alter_num = "024"..side
  title = "tbp_"..alter_num
@@ -77,15 +77,18 @@ function _init()
 
  --seed
  seed = flr(rnd(-1)) + 1
- b_seeds = {-1675, -20927, 8610}
- c_seeds = {
+ l_seeds = {-1675, -20927, 8610}
+ p_seeds = {
   -23163, -8963, 25168, 15546,
   -6259, 21150,16012 
  }
+ d_seeds = {-9834}
  if side == "l" then
-  seed = rnd_choice(b_seeds)
+  seed = rnd_choice(l_seeds)
  elseif side == "p" then
-  seed = rnd_choice(c_seeds)
+  seed = rnd_choice(p_seeds)
+ elseif side == "d" then
+  seed = rnd_choice(d_seeds)
  end
  srand(seed)
 
@@ -496,6 +499,7 @@ end
 function move_planet(p)
 	
 	for name2, p2 in pairs(planets) do
+
  	local dist=0
 
  	if not(p2==p) and not p.crashed then
@@ -747,6 +751,8 @@ function _update60()
   happens_once_done = true
  end
 
+
+
  --relative motion fix
  if not gods_eye_view then
   for name, p in pairs(planets) do
@@ -754,6 +760,31 @@ function _update60()
    p.y -= sy+64
   end
  end
+
+ --are they too far?
+ local x_too_far = false
+ local y_too_far = false
+ for name, p in pairs(planets) do
+  if p.x > 15000 then
+   x_too_far = true
+  end
+  if p.y > 15000 then
+   y_too_far = true
+  end
+ end
+ 
+ if x_too_far then
+  for name, p in pairs(planets) do
+   p.x = -p.x
+  end
+ end
+
+ if y_too_far then
+  for name, p in pairs(planets) do
+   p.y = -p.y
+  end
+ end
+
 
  --title
  title_decay -= 1
