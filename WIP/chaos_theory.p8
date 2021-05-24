@@ -66,7 +66,7 @@ function _init()
  alter_pressed = false
 
  --title
- side = "d"
+ side = "l"
  alter_title = "gltch"
  alter_num = "024"..side
  title = "tbp_"..alter_num
@@ -1137,7 +1137,7 @@ function dither(dm)
   for i=500,1,-1 do
    local pxl = rnd_pixel()
    c=pget(pxl.x,pxl.y)
-   circ(pxl.x,pxl.y,2,burn(c))
+   circ(pxl.x,pxl.y,2,burn_loop(c))
   end
  elseif dm == "burn" then
   for i=1,4 do 
@@ -1148,7 +1148,7 @@ function dither(dm)
     for y=128+fudge_y,0,-12 do
      local pxl = rnd_pixel()
       c=pget(pxl.x,pxl.y)
-      circ(pxl.x,pxl.y,1,burn(c))
+      circ(pxl.x,pxl.y,1,burn_loop(c))
     end
    end
   end
@@ -1161,7 +1161,7 @@ function dither(dm)
     for y=128+fudge_y,0,-12 do
      local pxl = rnd_pixel()
       c=pget(pxl.x,pxl.y)
-      rect(pxl.x-1,pxl.y-1,pxl.x+1,pxl.y+1,burn(c))
+      rect(pxl.x-1,pxl.y-1,pxl.x+1,pxl.y+1,burn_loop(c))
     end
    end
   end
@@ -1201,6 +1201,9 @@ function burn_loop(c)
  --given gradient, get new color to use
  if grad_i == 1 then
   grad_i = #burn_pal_key
+  local new_real_c = burn_pal[grad_i]
+  local new_c = tonum(cmap_new_old[new_real_c])
+  return(new_c)
  end
  local new_real_c = burn_pal[grad_i-1] 
  --now convert back to
